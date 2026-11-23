@@ -28,6 +28,14 @@ Use the stack and versions already established in the repository:
 - Framer Motion only when animation adds meaningful value
 - React Hook Form for form state and submission
 - Zod or Yup for schema-based form validation
+- shadcn/ui for reusable UI components
+- React Icons (`react-icons`) for application icons
+
+### Components and icons
+
+- Check for an existing shadcn/ui component before building a button, dialog, form control, or other common UI primitive. Add the needed shadcn/ui component through the project's established setup when one is missing, then adapt it to the feature.
+- Use React Icons for application icons. Do not hand-code SVG markup or create custom SVG components for icons.
+- When a shadcn/ui component includes its own internal icon, preserve the component's behavior and accessibility; use React Icons for icons added by EventNest code.
 
 ### Form and validation rules
 
