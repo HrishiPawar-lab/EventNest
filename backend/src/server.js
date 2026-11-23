@@ -2,6 +2,7 @@ import 'dotenv/config';
 import mongoose from 'mongoose';
 import { loadConfig } from './config.js';
 import { startServer } from './start.js';
+import './models/index.js';
 
 async function start() {
   const config = loadConfig();

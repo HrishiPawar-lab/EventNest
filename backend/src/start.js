@@ -32,6 +32,7 @@ export async function startServer(
       throw new AggregateError(
         [startError, disconnectError],
         'Server startup and MongoDB cleanup failed',
+        { cause: disconnectError },
       );
     }
     throw startError;
