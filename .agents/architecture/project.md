@@ -2,7 +2,7 @@
 
 ## Current status
 
-The repository contains project instructions and skills, but no application code yet. The root [`AGENTS.md`](../../AGENTS.md) defines the current v1 product rules and agreed stack. This document gives a shorter architectural map; it must stay consistent with that guide as implementation decisions are made.
+The repository contains a `frontend/` React starter and a `backend/` Express starter. The frontend currently renders a static empty state; the backend exposes a health endpoint and connects to MongoDB at startup. No product feature routes, authentication, payments, or ticketing workflows are implemented yet. The root [`AGENTS.md`](../../AGENTS.md) defines the current v1 product rules and agreed stack. This document gives a shorter architectural map; it must stay consistent with that guide as implementation decisions are made.
 
 ## Product and platform
 
@@ -17,7 +17,7 @@ The frontend deployment target is Vercel; the backend target is Render or AWS EC
 - **Data:** Mongoose models persist application records in MongoDB. References to users use local `users._id`; `clerkId` links a local user to Clerk.
 - **Integrations:** provider-specific code handles identity, payments, email, media, and real-time updates without putting secrets in the frontend.
 
-Keep these responsibilities clear within a simple application structure. The exact source tree has not been chosen yet.
+Keep these responsibilities clear within a simple application structure. The initial source tree separates `frontend/` and `backend/`; feature modules and API contracts will be added as product milestones are defined.
 
 ## V1 data model
 
@@ -39,7 +39,7 @@ This is a conceptual map, not a complete schema. The detailed fields, indexes, l
 
 - The first implementation milestone and order of attendee versus organizer features.
 - Whether v1 supports online events or only events with a physical venue.
-- The exact source tree, API contracts, schema fields, and deployment configuration.
+- Feature module structure, API contracts, schema fields, and deployment configuration.
 - Whether a separate mobile client will be built.
 
 Update this document when those decisions are confirmed. Do not describe an unimplemented feature as complete.
