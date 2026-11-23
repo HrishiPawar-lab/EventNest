@@ -12,7 +12,9 @@ before(async () => {
 });
 
 after(async () => {
-  await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+  await new Promise((resolve, reject) =>
+    server.close((error) => (error ? reject(error) : resolve())),
+  );
 });
 
 test('health endpoint responds without exposing Express version', async () => {
@@ -25,7 +27,9 @@ test('health endpoint responds without exposing Express version', async () => {
 test('unknown routes return a safe JSON error', async () => {
   const response = await fetch(`${baseUrl}/missing`);
   assert.equal(response.status, 404);
-  assert.deepEqual(await response.json(), { error: { code: 'NOT_FOUND', message: 'Route not found' } });
+  assert.deepEqual(await response.json(), {
+    error: { code: 'NOT_FOUND', message: 'Route not found' },
+  });
 });
 
 test('malformed JSON is rejected without exposing parser details', async () => {
@@ -35,7 +39,9 @@ test('malformed JSON is rejected without exposing parser details', async () => {
     body: '{invalid',
   });
   assert.equal(response.status, 400);
-  assert.deepEqual(await response.json(), { error: { code: 'BAD_REQUEST', message: 'Invalid request body' } });
+  assert.deepEqual(await response.json(), {
+    error: { code: 'BAD_REQUEST', message: 'Invalid request body' },
+  });
 });
 
 test('oversized JSON is rejected with a safe error', async () => {
@@ -45,15 +51,25 @@ test('oversized JSON is rejected with a safe error', async () => {
     body: JSON.stringify({ value: 'x'.repeat(102_400) }),
   });
   assert.equal(response.status, 413);
-  assert.deepEqual(await response.json(), { error: { code: 'PAYLOAD_TOO_LARGE', message: 'Request body too large' } });
+  assert.deepEqual(await response.json(), {
+    error: { code: 'PAYLOAD_TOO_LARGE', message: 'Request body too large' },
+  });
 });
 
 test('unsupported request encoding is rejected with a safe error', async () => {
   const response = await fetch(`${baseUrl}/health`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json', 'content-encoding': 'compress' },
+    headers: {
+      'content-type': 'application/json',
+      'content-encoding': 'compress',
+    },
     body: '{}',
   });
   assert.equal(response.status, 415);
-  assert.deepEqual(await response.json(), { error: { code: 'UNSUPPORTED_MEDIA_TYPE', message: 'Unsupported request encoding' } });
+  assert.deepEqual(await response.json(), {
+    error: {
+      code: 'UNSUPPORTED_MEDIA_TYPE',
+      message: 'Unsupported request encoding',
+    },
+  });
 });

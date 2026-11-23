@@ -29,7 +29,8 @@ function App() {
             Make room for memorable moments.
           </h1>
           <p className="mt-7 max-w-xl text-lg leading-relaxed text-stone-600">
-            EventNest is taking shape. Event discovery, general admission tickets, and organizer tools are on the way.
+            EventNest is taking shape. Event discovery, general admission tickets, and organizer
+            tools are on the way.
           </p>
           <div className="mt-10 border-l-2 border-emerald-800 pl-5">
             <p className="text-sm font-medium text-stone-700">

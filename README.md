@@ -31,6 +31,6 @@ The frontend starter is a static page. The backend exposes `GET /health` after i
 
 ## Checks
 
-Run `npm test` in `backend/`, and `npm run lint` plus `npm run build` in `frontend/`.
+Run `npm test` in `backend/`, and `npm run build` in `frontend/`. Both folders provide `npm run lint` and `npm run format:check`; use `npm run format` in either folder to apply Prettier formatting.
 
 The product rules and agreed technology stack are in [AGENTS.md](AGENTS.md). The [architecture notes](.agents/architecture/project.md) track open design decisions.

@@ -6,4 +6,4 @@ Node.js and Express API scaffold. MongoDB is required at startup; the server beg
 2. Run `npm install`.
 3. Run `npm run dev` for local development, or `npm start` for a normal process.
 
-`GET /health` returns `{ "status": "ok" }` once the server is running. Run `npm test` for the built-in Node.js tests. This scaffold has no event, user, payment, or ticket routes yet.
+`GET /health` returns `{ "status": "ok" }` once the server is running. Run `npm test` for the built-in Node.js tests, `npm run lint` for ESLint, and `npm run format:check` for Prettier. Use `npm run format` to apply formatting. This scaffold has no event, user, payment, or ticket routes yet.

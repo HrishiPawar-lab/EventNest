@@ -13,14 +13,20 @@ test('closes MongoDB connection when HTTP port is already in use', async () => {
       startServer(
         { port: occupied.address().port, mongodbUri: 'mongodb://unused' },
         {
-          connect: async () => { calls.push('connect'); },
-          disconnect: async () => { calls.push('disconnect'); },
+          connect: async () => {
+            calls.push('connect');
+          },
+          disconnect: async () => {
+            calls.push('disconnect');
+          },
         },
       ),
       { code: 'EADDRINUSE' },
     );
     assert.deepEqual(calls, ['connect', 'disconnect']);
   } finally {
-    await new Promise((resolve, reject) => occupied.close((error) => error ? reject(error) : resolve()));
+    await new Promise((resolve, reject) =>
+      occupied.close((error) => (error ? reject(error) : resolve())),
+    );
   }
 });

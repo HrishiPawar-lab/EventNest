@@ -10,7 +10,9 @@ export function createApp() {
   });
 
   app.use((_request, response) => {
-    response.status(404).json({ error: { code: 'NOT_FOUND', message: 'Route not found' } });
+    response
+      .status(404)
+      .json({ error: { code: 'NOT_FOUND', message: 'Route not found' } });
   });
 
   app.use((error, _request, response, _next) => {
@@ -18,7 +20,10 @@ export function createApp() {
     const errors = {
       400: { code: 'BAD_REQUEST', message: 'Invalid request body' },
       413: { code: 'PAYLOAD_TOO_LARGE', message: 'Request body too large' },
-      415: { code: 'UNSUPPORTED_MEDIA_TYPE', message: 'Unsupported request encoding' },
+      415: {
+        code: 'UNSUPPORTED_MEDIA_TYPE',
+        message: 'Unsupported request encoding',
+      },
       500: { code: 'INTERNAL_ERROR', message: 'Internal server error' },
     };
     response.status(status).json({ error: errors[status] });

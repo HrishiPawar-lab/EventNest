@@ -1,10 +1,14 @@
 import mongoose from 'mongoose';
 import { createApp } from './app.js';
 
-export async function startServer(config, {
-  connect = (uri) => mongoose.connect(uri, { serverSelectionTimeoutMS: 10000 }),
-  disconnect = () => mongoose.disconnect(),
-} = {}) {
+export async function startServer(
+  config,
+  {
+    connect = (uri) =>
+      mongoose.connect(uri, { serverSelectionTimeoutMS: 10000 }),
+    disconnect = () => mongoose.disconnect(),
+  } = {},
+) {
   await connect(config.mongodbUri);
 
   try {
@@ -25,7 +29,10 @@ export async function startServer(config, {
     try {
       await disconnect();
     } catch (disconnectError) {
-      throw new AggregateError([startError, disconnectError], 'Server startup and MongoDB cleanup failed');
+      throw new AggregateError(
+        [startError, disconnectError],
+        'Server startup and MongoDB cleanup failed',
+      );
     }
     throw startError;
   }

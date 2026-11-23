@@ -11,7 +11,7 @@ async function start() {
   async function shutdown() {
     try {
       await new Promise((resolve, reject) => {
-        server.close((error) => error ? reject(error) : resolve());
+        server.close((error) => (error ? reject(error) : resolve()));
       });
     } finally {
       await mongoose.disconnect();
@@ -30,6 +30,8 @@ async function start() {
 }
 
 start().catch(() => {
-  console.error('EventNest API failed to start. Check configuration and MongoDB availability.');
+  console.error(
+    'EventNest API failed to start. Check configuration and MongoDB availability.',
+  );
   process.exitCode = 1;
 });
