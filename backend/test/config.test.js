@@ -6,6 +6,7 @@ import { loadClerkConfig } from '../src/config/clerk.js';
 const clerkEnv = {
   CLERK_PUBLISHABLE_KEY: 'pk_test_placeholder',
   CLERK_SECRET_KEY: 'sk_test_placeholder',
+  CLERK_WEBHOOK_SIGNING_SECRET: 'whsec_test_placeholder',
 };
 
 test('loads a valid MongoDB URI and default port', () => {
@@ -20,6 +21,7 @@ test('loads a valid MongoDB URI and default port', () => {
       clerk: {
         publishableKey: 'pk_test_placeholder',
         secretKey: 'sk_test_placeholder',
+        webhookSigningSecret: 'whsec_test_placeholder',
       },
     },
   );
@@ -48,10 +50,12 @@ test('Clerk config trims both keys', () => {
     loadClerkConfig({
       CLERK_PUBLISHABLE_KEY: ' pk_test_placeholder ',
       CLERK_SECRET_KEY: ' sk_test_placeholder ',
+      CLERK_WEBHOOK_SIGNING_SECRET: ' whsec_test_placeholder ',
     }),
     {
       publishableKey: 'pk_test_placeholder',
       secretKey: 'sk_test_placeholder',
+      webhookSigningSecret: 'whsec_test_placeholder',
     },
   );
 });
@@ -65,6 +69,7 @@ test('startup config rejects missing or blank Clerk keys', () => {
           ...mongoEnv,
           CLERK_PUBLISHABLE_KEY: publishableKey,
           CLERK_SECRET_KEY: clerkEnv.CLERK_SECRET_KEY,
+          CLERK_WEBHOOK_SIGNING_SECRET: clerkEnv.CLERK_WEBHOOK_SIGNING_SECRET,
         }),
       { message: 'CLERK_PUBLISHABLE_KEY is required' },
     );
@@ -76,8 +81,21 @@ test('startup config rejects missing or blank Clerk keys', () => {
           ...mongoEnv,
           CLERK_PUBLISHABLE_KEY: clerkEnv.CLERK_PUBLISHABLE_KEY,
           CLERK_SECRET_KEY: secretKey,
+          CLERK_WEBHOOK_SIGNING_SECRET: clerkEnv.CLERK_WEBHOOK_SIGNING_SECRET,
         }),
       { message: 'CLERK_SECRET_KEY is required' },
+    );
+  }
+  for (const signingSecret of [undefined, '', '  ']) {
+    assert.throws(
+      () =>
+        loadConfig({
+          ...mongoEnv,
+          CLERK_PUBLISHABLE_KEY: clerkEnv.CLERK_PUBLISHABLE_KEY,
+          CLERK_SECRET_KEY: clerkEnv.CLERK_SECRET_KEY,
+          CLERK_WEBHOOK_SIGNING_SECRET: signingSecret,
+        }),
+      { message: 'CLERK_WEBHOOK_SIGNING_SECRET is required' },
     );
   }
 });

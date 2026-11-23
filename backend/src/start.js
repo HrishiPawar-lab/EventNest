@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { clerkMiddleware, createClerkClient } from '@clerk/express';
 import { createApp } from './app.js';
 
 export async function startServer(
@@ -7,13 +8,26 @@ export async function startServer(
     connect = (uri) =>
       mongoose.connect(uri, { serverSelectionTimeoutMS: 10000 }),
     disconnect = () => mongoose.disconnect(),
+    makeClerkMiddleware = clerkMiddleware,
   } = {},
 ) {
   await connect(config.mongodbUri);
 
   try {
     return await new Promise((resolve, reject) => {
-      const server = createApp().listen(config.port);
+      const clerkClient = config.clerk?.secretKey
+        ? createClerkClient({ secretKey: config.clerk.secretKey })
+        : undefined;
+      const server = createApp({
+        webhookSigningSecret: config.clerk?.webhookSigningSecret,
+        clerkClient,
+        clerkSessionMiddleware: config.clerk?.publishableKey
+          ? makeClerkMiddleware({
+              publishableKey: config.clerk.publishableKey,
+              clerkClient,
+            })
+          : undefined,
+      }).listen(config.port);
       const onError = (error) => {
         server.off('listening', onListening);
         reject(error);

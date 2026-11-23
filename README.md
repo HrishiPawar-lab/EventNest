@@ -15,7 +15,7 @@ In one terminal:
 cd backend
 npm ci
 cp .env.example .env
-# Set MONGODB_URI in .env.
+# Set MONGODB_URI, Clerk API keys, and CLERK_WEBHOOK_SIGNING_SECRET in .env.
 npm run dev
 ```
 
@@ -27,7 +27,7 @@ npm ci
 npm run dev
 ```
 
-The frontend starter is a static page. The backend exposes `GET /health` after it connects to MongoDB and defines the eight v1 Mongoose models. Authentication, payments, ticketing workflows, and other product features have not been implemented yet.
+The frontend starter is a static page. The backend exposes `GET /health`, defines the eight v1 Mongoose models, accepts verified Clerk user webhooks at `POST /api/webhooks/clerk`, and provides reusable authentication middleware. Payments, ticketing workflows, and protected attendee/organizer product routes have not been implemented yet.
 
 ## Checks
 

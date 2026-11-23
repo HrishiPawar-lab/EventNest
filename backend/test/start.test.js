@@ -17,11 +17,17 @@ test('starts health endpoint with validated config and an injected DB connection
     MONGODB_URI: 'mongodb://unused',
     CLERK_PUBLISHABLE_KEY: 'pk_test_placeholder',
     CLERK_SECRET_KEY: 'sk_test_placeholder',
+    CLERK_WEBHOOK_SIGNING_SECRET: 'whsec_test_placeholder',
   });
   let connectedUri;
+  let clerkMiddlewareOptions;
   const server = await startServer(config, {
     connect: async (uri) => {
       connectedUri = uri;
+    },
+    makeClerkMiddleware: (options) => {
+      clerkMiddlewareOptions = options;
+      return (_request, _response, next) => next();
     },
   });
 
@@ -30,6 +36,12 @@ test('starts health endpoint with validated config and an injected DB connection
     assert.equal(response.status, 200);
     assert.deepEqual(await response.json(), { status: 'ok' });
     assert.equal(connectedUri, 'mongodb://unused');
+    assert.equal(clerkMiddlewareOptions.publishableKey, 'pk_test_placeholder');
+    assert.equal(clerkMiddlewareOptions.secretKey, undefined);
+    assert.equal(
+      typeof clerkMiddlewareOptions.clerkClient.users.getUser,
+      'function',
+    );
   } finally {
     await new Promise((resolve, reject) =>
       server.close((error) => (error ? reject(error) : resolve())),
