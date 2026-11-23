@@ -1,13 +1,5 @@
 import { motion, useReducedMotion } from 'framer-motion'
-
-function NestMark() {
-  return (
-    <svg aria-hidden="true" className="size-8" fill="none" viewBox="0 0 32 32">
-      <path d="M5 11.5 16 5l11 6.5v9L16 27 5 20.5v-9Z" stroke="currentColor" strokeWidth="2" />
-      <path d="m9 14 7 4 7-4M16 18v6" stroke="currentColor" strokeLinecap="round" strokeWidth="2" />
-    </svg>
-  )
-}
+import { LuCalendarDays } from 'react-icons/lu'
 
 function App() {
   const reduceMotion = useReducedMotion()
@@ -17,7 +9,7 @@ function App() {
       <header className="border-b border-stone-200/80">
         <div className="mx-auto flex w-full max-w-6xl items-center px-5 py-5 sm:px-8">
           <div className="flex items-center gap-3 text-emerald-950">
-            <NestMark />
+            <LuCalendarDays aria-hidden="true" className="size-8" />
             <span className="text-xl font-semibold tracking-tight">EventNest</span>
           </div>
         </div>
