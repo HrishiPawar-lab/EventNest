@@ -2,7 +2,7 @@
 
 ## Current status
 
-The repository contains a `frontend/` React starter and a `backend/` Express starter. The frontend currently renders a static empty state; the backend exposes a health endpoint, connects to MongoDB at startup, defines the eight v1 Mongoose models, synchronizes users through verified Clerk webhooks, and provides reusable authentication middleware. Payments, ticketing workflows, and protected attendee/organizer product routes are not yet implemented. The root [`AGENTS.md`](../../AGENTS.md) defines the current v1 product rules and agreed stack. This document gives a shorter architectural map; it must stay consistent with that guide as implementation decisions are made.
+The repository contains a `frontend/` React starter and a `backend/` Express starter. The frontend has a public discovery starter, Clerk authentication screens, mandatory email and phone verification, and a protected account placeholder. The backend exposes a health endpoint, connects to MongoDB at startup, defines the eight v1 Mongoose models, synchronizes users through verified Clerk webhooks, and provides reusable authentication and authorization middleware. Payments, ticketing workflows, and protected attendee/organizer product routes are not yet implemented. The root [`AGENTS.md`](../../AGENTS.md) defines the current v1 product rules and agreed stack. This document gives a shorter architectural map; it must stay consistent with that guide as implementation decisions are made.
 
 ## Product and platform
 

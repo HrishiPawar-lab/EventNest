@@ -24,10 +24,11 @@ In another terminal:
 ```sh
 cd frontend
 npm ci
+# Set VITE_CLERK_PUBLISHABLE_KEY in frontend/.env.local.
 npm run dev
 ```
 
-The frontend starter is a static page. The backend exposes `GET /health`, defines the eight v1 Mongoose models, accepts verified Clerk user webhooks at `POST /api/webhooks/clerk`, and provides reusable authentication middleware. Payments, ticketing workflows, and protected attendee/organizer product routes have not been implemented yet.
+The frontend has a public discovery starter, Clerk sign-in and sign-up, mandatory email and phone verification, and a protected account placeholder. The backend exposes `GET /health`, defines the eight v1 Mongoose models, accepts verified Clerk user webhooks at `POST /api/webhooks/clerk`, and provides reusable authentication and authorization middleware. Payments, ticketing workflows, and protected attendee/organizer product routes have not been implemented yet.
 
 ## Checks
 
