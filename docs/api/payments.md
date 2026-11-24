@@ -7,19 +7,25 @@ Configure `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`,
 Keep the QR secret stable across deployments so existing ticket tokens remain
 derivable. Payment processing requires MongoDB transactions on a replica set.
 
-| Method | Route                                   | Access                           | Body                                                                       | Success                                                                                                             |
-| ------ | --------------------------------------- | -------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| POST   | `/api/payments/orders`                  | Authenticated purchaser          | `{ "reservationId": "ObjectId" }`                                          | 201 `{ "data": { "paymentId", "providerOrderId", "amount", "currency": "INR", "keyId" } }`                          |
-| POST   | `/api/payments/:paymentId/verify`       | Authenticated purchaser          | `{ "providerPaymentId": "pay_...", "signature": "64-character hex HMAC" }` | 200 `{ "data": { "status": "confirmed\|refund_pending\|refund_failed\|refunded", "paymentId" } }`                   |
-| POST   | `/api/payments/:paymentId/retry-refund` | Authenticated purchaser          | Empty body                                                                 | 200 `{ "data": { "status": "pending\|processed\|failed" } }`                                                        |
+| Method | Route                                   | Access                           | Body                                                                       | Success                                                                                                                                         |
+| ------ | --------------------------------------- | -------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| POST   | `/api/payments/orders`                  | Authenticated purchaser          | `{ "reservationId": "ObjectId" }`                                          | 201 `{ "data": { "paymentId", "providerOrderId", "amount", "currency": "INR", "keyId" } }`                                                      |
+| POST   | `/api/payments/:paymentId/verify`       | Authenticated purchaser          | `{ "providerPaymentId": "pay_...", "signature": "64-character hex HMAC" }` | 200 `{ "data": { "status": "confirmed\|refund_pending\|refund_failed\|refunded", "paymentId" } }`                                               |
+| POST   | `/api/payments/:paymentId/retry-refund` | Authenticated purchaser          | Empty body                                                                 | 200 `{ "data": { "status": "pending\|processed\|failed" } }`                                                                                    |
 | GET    | `/api/payments/:paymentId`              | Authenticated purchaser          | None                                                                       | 200 `{ "data": { "id", "reservationId", "providerOrderId", "keyId", "amount", "currency", "status", "refundStatus", "paidAt", "refundedAt" } }` |
-| GET    | `/api/tickets/:ticketId/qr`             | Authenticated ticket owner       | None                                                                       | 200 `{ "data": { "token": "opaque QR credential" } }`; `Cache-Control: no-store`                                    |
-| POST   | `/api/webhooks/razorpay`                | Razorpay HMAC over raw JSON body | Razorpay event                                                             | 200 `{ "status" }` for `payment.captured` / `order.paid` / refund events; other signed events are ignored           |
+| GET    | `/api/tickets/:ticketId/qr`             | Authenticated ticket owner       | None                                                                       | 200 `{ "data": { "token": "opaque QR credential" } }`; `Cache-Control: no-store`                                                                |
+| POST   | `/api/webhooks/razorpay`                | Razorpay HMAC over raw JSON body | Razorpay event                                                             | 200 `{ "status" }` for `payment.captured` / `order.paid` / refund events; other signed events are ignored                                       |
 
 `POST /orders` rejects inactive or expired reservations (409), unavailable
 events (409), nonpositive or unsupported fractional prices (409), invalid IDs
 (400), and reservations belonging to another user (404). The response contains
 the public key ID; it never contains the key secret.
+If Razorpay rejects an order or returns an inconsistent order response, the
+endpoint returns `502 PAYMENT_PROVIDER_ERROR`. The server logs only the provider
+HTTP status, if available, and never logs provider response bodies or credentials.
+An unexpected failure while saving the Payment record still returns generic
+`500 INTERNAL_ERROR`; the server logs a safe persistence-stage marker. Check
+the Render logs at the request time to distinguish these failures.
 `GET /:paymentId` returns the original order ID and public key ID so the
 purchaser can reopen an unfinished checkout attempt after a reload without
 creating another Razorpay order. It never returns the key secret or payment

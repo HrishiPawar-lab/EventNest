@@ -43,7 +43,7 @@ export function OrganizerShell({
           {navigation.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
-              to={to}
+              to={!preview && label === 'My events' ? '/organizer/events' : to}
               end={end}
               className={({ isActive }) =>
                 `flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-brand text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'}`

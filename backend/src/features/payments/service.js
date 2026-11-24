@@ -158,58 +158,87 @@ export function createPaymentService({
         throw new ApiError(409, 'EVENT_UNAVAILABLE', 'Event is unavailable');
       const amount = amountInPaise(event.ticketPrice, reservation.quantity);
       const paymentId = new mongoose.Types.ObjectId();
-      const order = await gateway.createOrder({
-        amount,
-        currency: 'INR',
-        receipt: `eventnest_${paymentId}`,
-      });
-      if (
-        typeof order?.id !== 'string' ||
-        order.amount !== amount ||
-        order.currency !== 'INR'
-      )
-        throw new Error('Razorpay order response does not match request');
-      await runTransaction(async (session) => {
-        const current = await reservationModel.findOneAndUpdate(
-          {
-            _id: reservationId,
-            userId,
-            status: 'pending',
-            expiresAt: { $gt: now() },
-          },
-          { $inc: { __v: 1 } },
-          { new: true, session },
-        );
-        if (!current)
-          throw new ApiError(
-            409,
-            'RESERVATION_EXPIRED',
-            'Reservation is no longer active',
-          );
-        const lockedEvent = await eventModel.findOneAndUpdate(
-          {
-            _id: current.eventId,
-            status: 'published',
-            startDate: { $gt: now() },
-          },
-          { $inc: { __v: 1 } },
-          { new: true, session },
-        );
-        if (!lockedEvent)
-          throw new ApiError(409, 'EVENT_UNAVAILABLE', 'Event is unavailable');
-        if (amountInPaise(lockedEvent.ticketPrice, current.quantity) !== amount)
-          throw new ApiError(409, 'PRICE_CHANGED', 'Event price changed');
-        await new paymentModel({
-          _id: paymentId,
-          userId,
-          eventId: current.eventId,
-          reservationId,
-          providerOrderId: order.id,
+      let order;
+      try {
+        order = await gateway.createOrder({
           amount,
           currency: 'INR',
-          status: 'created',
-        }).save({ session });
-      });
+          receipt: `eventnest_${paymentId}`,
+        });
+        if (
+          typeof order?.id !== 'string' ||
+          order.amount !== amount ||
+          order.currency !== 'INR'
+        )
+          throw new Error('Razorpay order response does not match request');
+      } catch (error) {
+        const providerStatus = Number.isInteger(error?.statusCode)
+          ? error.statusCode
+          : Number.isInteger(error?.status)
+            ? error.status
+            : undefined;
+        console.error('Payment provider order creation failed', {
+          providerStatus,
+        });
+        throw new ApiError(
+          502,
+          'PAYMENT_PROVIDER_ERROR',
+          'Payment provider could not create an order',
+        );
+      }
+      try {
+        await runTransaction(async (session) => {
+          const current = await reservationModel.findOneAndUpdate(
+            {
+              _id: reservationId,
+              userId,
+              status: 'pending',
+              expiresAt: { $gt: now() },
+            },
+            { $inc: { __v: 1 } },
+            { new: true, session },
+          );
+          if (!current)
+            throw new ApiError(
+              409,
+              'RESERVATION_EXPIRED',
+              'Reservation is no longer active',
+            );
+          const lockedEvent = await eventModel.findOneAndUpdate(
+            {
+              _id: current.eventId,
+              status: 'published',
+              startDate: { $gt: now() },
+            },
+            { $inc: { __v: 1 } },
+            { new: true, session },
+          );
+          if (!lockedEvent)
+            throw new ApiError(
+              409,
+              'EVENT_UNAVAILABLE',
+              'Event is unavailable',
+            );
+          if (
+            amountInPaise(lockedEvent.ticketPrice, current.quantity) !== amount
+          )
+            throw new ApiError(409, 'PRICE_CHANGED', 'Event price changed');
+          await new paymentModel({
+            _id: paymentId,
+            userId,
+            eventId: current.eventId,
+            reservationId,
+            providerOrderId: order.id,
+            amount,
+            currency: 'INR',
+            status: 'created',
+          }).save({ session });
+        });
+      } catch (error) {
+        if (!(error instanceof ApiError))
+          console.error('Payment order persistence failed');
+        throw error;
+      }
       return {
         paymentId,
         providerOrderId: order.id,

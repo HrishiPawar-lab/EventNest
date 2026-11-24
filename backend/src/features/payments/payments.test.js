@@ -83,6 +83,54 @@ test('payment order converts unit INR price to integer paise before multiplying'
   assert.equal(saved[0].amount, 87);
 });
 
+test('payment order reports provider failure without exposing provider details', async (context) => {
+  const log = context.mock.method(console, 'error', () => {});
+  let transactionCalled = false;
+  const service = createPaymentService({
+    keyId: 'rzp_test_key',
+    qrSecret,
+    gateway: {
+      createOrder: async () => {
+        throw {
+          statusCode: 401,
+          error: { description: 'Sensitive provider details' },
+        };
+      },
+    },
+    reservationModel: {
+      findOne: async () => ({
+        eventId,
+        quantity: 1,
+        status: 'pending',
+        expiresAt: new Date(at.getTime() + 60000),
+      }),
+    },
+    eventModel: {
+      findOne: async () => ({
+        ticketPrice: 499,
+        status: 'published',
+        startDate: new Date(at.getTime() + 3600000),
+      }),
+    },
+    runTransaction: async () => {
+      transactionCalled = true;
+    },
+    now: () => at,
+  });
+  await assert.rejects(
+    () => service.createOrder(userId, String(reservationId)),
+    (error) =>
+      error instanceof ApiError &&
+      error.status === 502 &&
+      error.code === 'PAYMENT_PROVIDER_ERROR',
+  );
+  assert.equal(transactionCalled, false);
+  assert.deepEqual(log.mock.calls[0].arguments, [
+    'Payment provider order creation failed',
+    { providerStatus: 401 },
+  ]);
+});
+
 function query(value) {
   return {
     session: async () => value,

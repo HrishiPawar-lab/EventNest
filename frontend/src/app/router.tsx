@@ -84,6 +84,21 @@ const OrganizerEventsPage = lazy(() =>
     default: module.OrganizerEventsPage,
   })),
 )
+const OrganizerLiveEventsPage = lazy(() =>
+  import('../features/organizer/OrganizerLiveEventsPage').then((module) => ({
+    default: module.OrganizerLiveEventsPage,
+  })),
+)
+const OrganizerLiveEventDetailPage = lazy(() =>
+  import('../features/organizer/OrganizerLiveEventsPage').then((module) => ({
+    default: module.OrganizerLiveEventDetailPage,
+  })),
+)
+const OrganizerLiveEventForm = lazy(() =>
+  import('../features/organizer/OrganizerLiveEventForm').then((module) => ({
+    default: module.OrganizerLiveEventForm,
+  })),
+)
 const EventFormPage = lazy(() =>
   import('../features/organizer/OrganizerEventPages').then((module) => ({
     default: module.EventFormPage,
@@ -147,6 +162,10 @@ export function AppRoutes() {
           <Route path="/become-organizer" element={<BecomeOrganizerPage />} />
           <Route path="/organizer/access-denied" element={<OrganizerAccessDeniedPage />} />
           <Route path="/organizer/preview" element={<OrganizerDashboardPage />} />
+          <Route path="/organizer/events" element={<OrganizerLiveEventsPage />} />
+          <Route path="/organizer/events/new" element={<OrganizerLiveEventForm />} />
+          <Route path="/organizer/events/:eventId/edit" element={<OrganizerLiveEventForm />} />
+          <Route path="/organizer/events/:eventId" element={<OrganizerLiveEventDetailPage />} />
           <Route path="/organizer/preview/events" element={<OrganizerEventsPage />} />
           <Route path="/organizer/preview/events/new" element={<EventFormPage />} />
           <Route path="/organizer/preview/events/:eventId/edit" element={<EventFormPage />} />

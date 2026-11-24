@@ -16,6 +16,8 @@ import {
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { Button } from '../ui/button'
 import { clearDestination } from '../../features/auth/returnTo'
+import { useOrganizerAccess } from '../../features/organizer/api'
+import { ApiRequestError } from '../../lib/api'
 
 const links = [
   { to: '/', label: 'Home', icon: LuHouse },
@@ -62,6 +64,7 @@ export function SiteShell({
   const { signOut } = useClerk()
   const location = useLocation()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [accountOpen, setAccountOpen] = useState(false)
   const [signOutError, setSignOutError] = useState('')
 
   async function leave() {
@@ -101,7 +104,10 @@ export function SiteShell({
           </Link>
           <div className="hidden items-center gap-3 lg:flex">
             {isLoaded && isSignedIn ? (
-              <details className="group relative">
+              <details
+                className="group relative"
+                onToggle={(event) => setAccountOpen(event.currentTarget.open)}
+              >
                 <summary
                   aria-label="Account menu"
                   className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-stone-200 bg-white px-2 py-1.5 text-sm font-medium hover:border-stone-400"
@@ -124,11 +130,7 @@ export function SiteShell({
                   <MenuLink to="/profile" icon={<LuUserRound />} label="My profile" />
                   <MenuLink to="/tickets" icon={<LuTicket />} label="My tickets" />
                   <MenuLink to="/wishlist" icon={<LuHeart />} label="Wishlist" />
-                  <MenuLink
-                    to="/become-organizer"
-                    icon={<LuCalendarDays />}
-                    label="Become an organizer"
-                  />
+                  {accountOpen && <OrganizerMenuLink />}
                   <button
                     onClick={leave}
                     className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-stone-600 hover:bg-stone-100"
@@ -198,14 +200,7 @@ export function SiteShell({
               <LuUserRound aria-hidden="true" className="size-4 text-brand" />
               {isSignedIn ? 'My profile' : 'Sign in'}
             </Link>
-            <Link
-              to="/become-organizer"
-              onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-[15px] font-medium hover:bg-stone-100"
-            >
-              <LuCalendarDays aria-hidden="true" className="size-4 text-brand" />
-              Become an organizer
-            </Link>
+            {isSignedIn && <OrganizerMenuLink mobile onSelect={() => setMobileOpen(false)} />}
           </nav>
         )}
       </header>
@@ -230,6 +225,44 @@ function MenuLink({ to, icon, label }: { to: string; icon: ReactNode; label: str
         {icon}
       </span>
       {label}
+    </Link>
+  )
+}
+
+function OrganizerMenuLink({
+  mobile = false,
+  onSelect,
+}: {
+  mobile?: boolean
+  onSelect?: () => void
+}) {
+  const access = useOrganizerAccess()
+  const className = mobile
+    ? 'flex items-center gap-3 rounded-lg px-3 py-2 text-[15px] font-medium hover:bg-stone-100'
+    : 'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100'
+
+  if (access.isPending)
+    return (
+      <span role="status" className={className}>
+        Checking organizer access...
+      </span>
+    )
+  if (access.isError && !(access.error instanceof ApiRequestError && access.error.status === 403)) {
+    return (
+      <button type="button" className={className} onClick={() => void access.refetch()}>
+        Retry organizer access
+      </button>
+    )
+  }
+  const isOrganizer = access.isSuccess
+  return (
+    <Link
+      to={isOrganizer ? '/organizer/events' : '/become-organizer'}
+      onClick={onSelect}
+      className={className}
+    >
+      <LuCalendarDays aria-hidden="true" className="size-4 text-brand" />{' '}
+      {isOrganizer ? 'Manage events' : 'Become an organizer'}
     </Link>
   )
 }
