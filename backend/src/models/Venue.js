@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { addCoverImageFields } from './coverImage.js';
 import { isPositiveInteger } from './validators.js';
 
 const geoPointSchema = new mongoose.Schema(
@@ -56,6 +57,8 @@ const venueSchema = new mongoose.Schema(
   },
   { collection: 'venues', timestamps: true },
 );
+
+addCoverImageFields(venueSchema);
 
 venueSchema.index({ organizerId: 1 });
 venueSchema.index({ 'address.city': 1 });

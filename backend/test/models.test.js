@@ -171,6 +171,50 @@ test('venue validates type, capacity, and longitude/latitude', async () => {
   );
 });
 
+test('event and venue cover images require a secure URL and paired Cloudinary public ID', async () => {
+  for (const [Model, fields] of [
+    [Event, validEvent()],
+    [Venue, validVenue()],
+  ]) {
+    const withoutImage = new Model(fields);
+    await withoutImage.validate();
+    assert.equal(withoutImage.imageUrl, undefined);
+    assert.equal(withoutImage.imagePublicId, undefined);
+
+    for (const imageUrl of [
+      'https://res.cloudinary.com/demo/image/upload/v1/events/cover.jpg',
+      'https://media.example.com/events/cover.jpg',
+    ]) {
+      const withImage = new Model({
+        ...fields,
+        imageUrl,
+        imagePublicId: 'events/cover',
+      });
+      await withImage.validate();
+      assert.equal(withImage.imagePublicId, 'events/cover');
+    }
+
+    for (const image of [
+      { imageUrl: 'https://media.example.com/cover.jpg' },
+      { imagePublicId: 'events/cover' },
+      {
+        imageUrl: 'http://media.example.com/cover.jpg',
+        imagePublicId: 'events/cover',
+      },
+      { imageUrl: 'https://media.example.com/cover.jpg', imagePublicId: '   ' },
+      {
+        imageUrl: 'https://user:pass@media.example.com/cover.jpg',
+        imagePublicId: 'events/cover',
+      },
+      { imageUrl: null, imagePublicId: null },
+    ]) {
+      await assert.rejects(new Model({ ...fields, ...image }).validate(), {
+        name: 'ValidationError',
+      });
+    }
+  }
+});
+
 test('event requires a venue, ordered dates, and valid inventory fields', async () => {
   const event = new Event(validEvent());
   await event.validate();

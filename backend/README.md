@@ -14,7 +14,7 @@ The health and Clerk webhook routes are public. Clerk session middleware runs af
 
 Webhook tests use a mocked Clerk lookup and an in-memory model; authentication tests use mocked Clerk auth state and local user lookup. Live Clerk token verification, webhook delivery, and MongoDB writes have not been verified.
 
-Cloudinary configuration lives in `src/config/cloudinary.js`. When all three Cloudinary variables are present, startup configures the Node SDK for secure delivery without making a network request. Leaving all three unset keeps the integration dormant; a partial set fails startup with a safe variable-name error. `CLOUDINARY_URL` is not used by this setup. Upload and image routes, asset lifecycle handling, and event/venue image fields are not implemented.
+Cloudinary configuration lives in `src/config/cloudinary.js`. When all three Cloudinary variables are present, startup configures the Node SDK for secure delivery without making a network request. Leaving all three unset keeps the integration dormant; a partial set fails startup with a safe variable-name error. `CLOUDINARY_URL` is not used by this setup. Event and Venue documents may store one optional cover image as paired `imageUrl` and `imagePublicId` fields. They validate HTTPS delivery URLs and nonempty public IDs, while a future authenticated upload/CRUD service must persist trusted Cloudinary results and enforce organizer ownership. Upload and image routes and asset lifecycle handling are not implemented.
 
 ## Optional-phone index migration
 

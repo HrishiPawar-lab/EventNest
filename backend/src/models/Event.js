@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { addCoverImageFields } from './coverImage.js';
 import {
   isNonNegativeAmount,
   isNonNegativeInteger,
@@ -97,6 +98,8 @@ const eventSchema = new mongoose.Schema(
   },
   { collection: 'events', timestamps: true },
 );
+
+addCoverImageFields(eventSchema);
 
 eventSchema.index({ organizerId: 1, createdAt: -1 });
 eventSchema.index({ venueId: 1 });

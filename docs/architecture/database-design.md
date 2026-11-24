@@ -1,6 +1,6 @@
 # EventNest --- Database Architecture Specification
 
-**Version:** 1.1\
+**Version:** 1.2\
 **Status:** Approved baseline for v1 database implementation\
 **Database:** MongoDB\
 **ODM:** Mongoose
@@ -9,6 +9,10 @@
 verification is unavailable for some users and countries. Verified email
 remains mandatory for account access. A supplied phone remains unique and
 must use E.164 format; only a verified phone may be treated as verified.
+
+**v1.2 decision (2026-11-24):** Each event and venue may have one optional
+Cloudinary cover image. The image is represented by a paired secure delivery
+URL and Cloudinary public ID. Existing documents need no backfill.
 
 ## 1. Agreed v1 constraints
 
@@ -109,6 +113,8 @@ Reusable physical venues owned by organizers.
   name: String,
   type: String,                // bar, club, restaurant, auditorium, outdoor, other
   description: String,
+  imageUrl: String,            // Optional HTTPS Cloudinary cover delivery URL
+  imagePublicId: String,       // Optional Cloudinary public ID, paired with imageUrl
   address: {
     street: String, city: String, state: String,
     country: String, postalCode: String
@@ -127,6 +133,9 @@ Rules: - `organizerId` references `users._id`; only the owner manages
 the venue. - Use GeoJSON Point coordinates in `[longitude, latitude]`
 order. - Venue type is a controlled enum.
 
+The cover image fields must be set or removed together. A venue without
+either field remains valid.
+
 ### 4.3 `events`
 
 Event details, venue association, discovery location, and inventory
@@ -139,6 +148,8 @@ counters.
   venueId: ObjectId,           // Required venues reference
   name: String,
   description: String,
+  imageUrl: String,            // Optional HTTPS Cloudinary cover delivery URL
+  imagePublicId: String,       // Optional Cloudinary public ID, paired with imageUrl
   category: String,
   eventType: "in-person",
   startDate: Date,
@@ -165,6 +176,16 @@ once finalized. - Event location is deliberately copied from the venue
 for direct city discovery. The venue remains the source of truth.
 Changing an event's venue must also update its copied location
 consistently.
+
+The cover image fields must be set or removed together. An event without
+either field remains valid. The model validates HTTPS delivery URLs and
+nonempty public IDs; a future authenticated upload and CRUD service must
+persist trusted Cloudinary results and enforce organizer ownership. Custom
+secure delivery domains are allowed, so the schema does not pin the URL to
+`res.cloudinary.com`. No upload or CRUD endpoint is included in this database
+change. Query updates must set or unset both fields together because Mongoose
+document validation middleware does not guard `updateOne` or
+`findOneAndUpdate`. No image index is needed for current query patterns.
 
 ### 4.4 `ticketReservations`
 
