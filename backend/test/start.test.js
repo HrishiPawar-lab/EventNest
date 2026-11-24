@@ -18,10 +18,17 @@ test('starts health endpoint with validated config and an injected DB connection
     CLERK_PUBLISHABLE_KEY: 'pk_test_placeholder',
     CLERK_SECRET_KEY: 'sk_test_placeholder',
     CLERK_WEBHOOK_SIGNING_SECRET: 'whsec_test_placeholder',
+    CLOUDINARY_CLOUD_NAME: 'eventnest-test',
+    CLOUDINARY_API_KEY: 'key-test',
+    CLOUDINARY_API_SECRET: 'secret-test',
   });
   let connectedUri;
   let clerkMiddlewareOptions;
+  let cloudinaryConfig;
   const server = await startServer(config, {
+    configureMedia: (value) => {
+      cloudinaryConfig = value;
+    },
     connect: async (uri) => {
       connectedUri = uri;
     },
@@ -36,6 +43,11 @@ test('starts health endpoint with validated config and an injected DB connection
     assert.equal(response.status, 200);
     assert.deepEqual(await response.json(), { status: 'ok' });
     assert.equal(connectedUri, 'mongodb://unused');
+    assert.deepEqual(cloudinaryConfig, {
+      cloudName: 'eventnest-test',
+      apiKey: 'key-test',
+      apiSecret: 'secret-test',
+    });
     assert.equal(clerkMiddlewareOptions.publishableKey, 'pk_test_placeholder');
     assert.equal(clerkMiddlewareOptions.secretKey, undefined);
     assert.equal(

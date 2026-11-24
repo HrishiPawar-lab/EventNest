@@ -2,12 +2,13 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
-import { AccountPage } from './AccountPage'
-import { rememberDestination } from './returnTo'
+import { ProfilePage } from './ProfilePage'
+import { rememberDestination } from '../auth/returnTo'
 
 const clerkState = vi.hoisted(() => ({ signOut: vi.fn() }))
 vi.mock('@clerk/react', () => ({
   useUser: () => ({ user: { firstName: 'Ada' } }),
+  useAuth: () => ({ isLoaded: true, isSignedIn: true }),
   useClerk: () => ({ signOut: clerkState.signOut }),
 }))
 
@@ -23,9 +24,10 @@ describe('account session controls', () => {
     rememberDestination('/account?eventId=evt_42')
     render(
       <MemoryRouter>
-        <AccountPage />
+        <ProfilePage />
       </MemoryRouter>,
     )
+    await userEvent.setup().click(screen.getByLabelText('Account menu'))
     await userEvent.setup().click(screen.getByRole('button', { name: 'Sign out' }))
     await waitFor(() => expect(clerkState.signOut).toHaveBeenCalledWith({ redirectUrl: '/' }))
     expect(sessionStorage.length).toBe(0)
@@ -34,7 +36,7 @@ describe('account session controls', () => {
   it('offers optional phone verification when no phone is present', () => {
     render(
       <MemoryRouter>
-        <AccountPage />
+        <ProfilePage />
       </MemoryRouter>,
     )
     expect(screen.getByText('Phone not added (optional)')).toBeTruthy()
@@ -47,9 +49,10 @@ describe('account session controls', () => {
     clerkState.signOut.mockRejectedValue(new Error('Offline'))
     render(
       <MemoryRouter>
-        <AccountPage />
+        <ProfilePage />
       </MemoryRouter>,
     )
+    await userEvent.setup().click(screen.getByLabelText('Account menu'))
     await userEvent.setup().click(screen.getByRole('button', { name: 'Sign out' }))
     await waitFor(() =>
       expect(screen.getByRole('alert').textContent).toContain('Could not sign out'),

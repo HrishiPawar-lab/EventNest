@@ -1,28 +1,32 @@
-# EventNest frontend
+﻿# EventNest frontend
 
-React, TypeScript, Vite, Tailwind CSS, and Clerk power the current frontend scaffold. The public home page is available without signing in. Sign-in, sign-up, email verification, optional phone verification, and a protected account placeholder are implemented.
+React, TypeScript, Vite, Tailwind CSS, and Clerk power the EventNest interface. The frontend has public event discovery, account screens, an attendee journey, and an organizer workspace preview. The event, booking, ticket, and organizer content is **sample presentation data** until the corresponding backend APIs exist. The app does not create reservations, accept payments, issue tickets, or check guests in.
 
 ## Local setup
 
 1. Copy `.env.example` to `.env.local`.
-2. Set `VITE_CLERK_PUBLISHABLE_KEY` to the Clerk publishable key for this environment. Never put a Clerk secret key in a `VITE_` variable.
+2. Set `VITE_CLERK_PUBLISHABLE_KEY` to the Clerk publishable key. Never put a Clerk secret key in a `VITE_` variable.
 3. Run `npm ci` and `npm run dev`.
 
-The Clerk Dashboard instance must have email/password sign-in, Google OAuth, and email verification codes enabled. In **User & authentication → Phone**, make phone collection optional at sign-up; verify that Clerk's sign-up form no longer marks Phone number as required. Keep phone capability enabled if users should be able to add a number later through `/verify-phone`. If Clerk Organizations are enabled, select **Organization settings → Membership optional** so attendees can sign up and use a personal account without creating an organization. Leave automatic first-organization creation disabled. The app requires a verified primary email before signed-in users can continue. Optional phone verification depends on Clerk SMS availability for the user's country. Clerk's sign-in and sign-up components follow Dashboard settings and own password, OAuth, and initial sign-up verification flows; EventNest never stores credentials.
+The Clerk instance must enable email/password sign-in, Google OAuth, and email verification. In the Clerk Dashboard, make phone collection optional at sign-up. Phone verification can be offered later through `/verify-phone` where Clerk SMS is supported. If Clerk Organizations are enabled, set membership optional and disable automatic first-organization creation so attendee registration does not require an organization. EventNest requires a verified primary email but never requires a phone number.
 
-## Routes and redirects
+## Frontend structure and routes
 
-- `/` is public.
-- `/sign-in` and `/sign-up` use Clerk's prebuilt components.
-- `/verify-email` completes required email verification with Clerk APIs. `/verify-phone` lets signed-in users add a verified phone number voluntarily when Clerk SMS is available.
-- `/account` is protected and currently contains only account status and sign-out.
+`src/app/router.tsx` owns route composition. `src/features/` groups auth, events, booking, tickets, wishlist, profile, and organizer screens. `src/components/layout/SiteShell.tsx` provides shared attendee navigation; organizer preview screens share `OrganizerShell.tsx`. Shared UI primitives remain in `src/components/ui/`. The public event catalog is defined once in `src/features/events/catalog.ts`.
 
-Protected-route redirects keep a same-origin destination in `return_to` and tab-local session storage. The `destinationFromLocation` helper also carries `location.state.ticketSelection.eventId` and `.quantity` into the return URL. A future event or checkout screen must pass that state when it starts sign-in; no checkout route or backend ticket endpoint exists yet.
+- Public: `/`, `/explore`, `/search`, `/events/:eventId`, `/booking/review/:eventId`, `/organizers/:slug`.
+- Clerk and account: `/sign-in`, `/sign-up`, `/verify-email`, optional `/verify-phone`, `/profile`, `/settings`.
+- Protected attendee: `/checkout/:eventId`, `/booking/confirmation/:eventId`, `/tickets`, `/tickets/:ticketId`, `/wishlist`.
+- Protected organizer **preview**: `/become-organizer` and `/organizer/preview/*` for dashboard, events, venues, attendees, check-in, and analytics. Preview access does not grant organizer permissions or permit data changes.
 
-## Backend API dependency
+Guests can browse, search, filter, and open event details. The event ID and selected `quantity` remain in the checkout URL through the Clerk sign-in redirect. Only authenticated users can open checkout, and the payment action remains disabled while reservation and payment APIs are absent. The ticket detail screen contains no scannable QR code. Organizer forms validate input and show a local preview; they do not save or publish anything. Preview wishlist selections are stored per Clerk user in this browser, with no backend sync.
 
-`useAuthenticatedApi()` in `src/features/auth/api.ts` retrieves a fresh Clerk session token and sends it as `Authorization: Bearer ...` to `VITE_API_BASE_URL`. It is ready for future protected API calls and is not currently called by the account placeholder. The backend still needs a protected product endpoint and CORS configured for the frontend origin before a live cross-origin request can be verified. Set `VITE_API_BASE_URL` to the backend origin when those routes are available.
+## Backend integration needed
 
-## Checks
+The backend currently exposes health and Clerk webhook functionality, with no confirmed product endpoints. Live screens require documented contracts for public event search and details, local user roles and organizer onboarding, organizer-owned venues and events, wishlist persistence, atomic ticket reservations, Razorpay payment verification, issued tickets and QR credentials, check-in, and analytics. Role and ownership decisions must be enforced on the backend. The frontend must not infer organizer permission from Clerk alone.
 
-Run `npm test`, `npm run lint`, `npm run format:check`, and `npm run build`. The build first typechecks the TypeScript source and tests. Tests mock Clerk account operations and cover route gating, destination preservation, OTP interactions, sign-out, and Bearer-token request construction. They do not prove live Google OAuth, email delivery, SMS delivery, or Clerk Dashboard configuration.
+`useAuthenticatedApi()` in `src/features/auth/api.ts` is ready to attach a fresh Clerk session token as a Bearer token to future protected requests. Set `VITE_API_BASE_URL` to the backend origin when product endpoints and CORS are available.
+
+## Assets and checks
+
+The visual direction is recorded in `docs/ui/image.png`. Event photography in `public/images` is sourced from Unsplash. The images are used as generic scenes, not as photos of the sample events. Run `npm test`, `npm run lint`, `npm run format:check`, and `npm run build`. Tests mock Clerk operations and do not prove live OAuth, email/SMS delivery, database connectivity, or payment integration.

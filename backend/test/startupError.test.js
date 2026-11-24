@@ -9,6 +9,14 @@ test('identifies missing configuration without logging values', () => {
     ),
     /configuration error: CLERK_WEBHOOK_SIGNING_SECRET is required/,
   );
+  assert.match(
+    getStartupFailureMessage(
+      new Error(
+        'CLOUDINARY_API_SECRET is required when Cloudinary is configured',
+      ),
+    ),
+    /configuration error: CLOUDINARY_API_SECRET is required/,
+  );
 });
 
 test('classifies MongoDB failures without exposing their messages', () => {

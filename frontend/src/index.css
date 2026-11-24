@@ -1,5 +1,12 @@
 @import 'tailwindcss';
 
+@theme {
+  --color-brand: #f35a12;
+  --color-brand-dark: #d74608;
+  --color-ink: #171717;
+  --color-paper: #f7f6f3;
+}
+
 :root {
   font-family:
     Inter,
@@ -12,4 +19,15 @@
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }

@@ -2,6 +2,10 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { loadConfig } from '../src/config.js';
 import { loadClerkConfig } from '../src/config/clerk.js';
+import {
+  configureCloudinary,
+  loadCloudinaryConfig,
+} from '../src/config/cloudinary.js';
 
 const clerkEnv = {
   CLERK_PUBLISHABLE_KEY: 'pk_test_placeholder',
@@ -23,8 +27,68 @@ test('loads a valid MongoDB URI and default port', () => {
         secretKey: 'sk_test_placeholder',
         webhookSigningSecret: 'whsec_test_placeholder',
       },
+      cloudinary: null,
     },
   );
+});
+
+test('Cloudinary config is optional until credentials are supplied', () => {
+  assert.equal(loadCloudinaryConfig({}), null);
+  assert.equal(
+    loadCloudinaryConfig({
+      CLOUDINARY_CLOUD_NAME: '',
+      CLOUDINARY_API_KEY: '',
+      CLOUDINARY_API_SECRET: '',
+    }),
+    null,
+  );
+});
+
+test('Cloudinary config trims credentials and configures secure delivery', () => {
+  const config = loadCloudinaryConfig({
+    CLOUDINARY_CLOUD_NAME: ' eventnest-test ',
+    CLOUDINARY_API_KEY: ' key-test ',
+    CLOUDINARY_API_SECRET: ' secret-test ',
+  });
+  assert.deepEqual(config, {
+    cloudName: 'eventnest-test',
+    apiKey: 'key-test',
+    apiSecret: 'secret-test',
+  });
+  let options;
+  const fakeClient = {
+    config(value) {
+      options = value;
+    },
+  };
+  assert.equal(configureCloudinary(config, fakeClient), fakeClient);
+  assert.deepEqual(options, {
+    cloud_name: 'eventnest-test',
+    api_key: 'key-test',
+    api_secret: 'secret-test',
+    secure: true,
+  });
+});
+
+test('partial Cloudinary credentials fail without revealing supplied values', () => {
+  const secret = 'sensitive-cloudinary-secret';
+  for (const missing of [
+    'CLOUDINARY_CLOUD_NAME',
+    'CLOUDINARY_API_KEY',
+    'CLOUDINARY_API_SECRET',
+  ]) {
+    const env = {
+      CLOUDINARY_CLOUD_NAME: 'eventnest-test',
+      CLOUDINARY_API_KEY: 'key-test',
+      CLOUDINARY_API_SECRET: secret,
+      [missing]: '  ',
+    };
+    assert.throws(
+      () => loadCloudinaryConfig(env),
+      (error) =>
+        error.message.includes(missing) && !error.message.includes(secret),
+    );
+  }
 });
 
 test('rejects missing MongoDB URI', () => {

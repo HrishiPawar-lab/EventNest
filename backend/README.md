@@ -2,7 +2,7 @@
 
 Node.js and Express API scaffold. MongoDB is required at startup; the server begins listening only after Mongoose connects. Use a MongoDB server supported by the installed Mongoose version.
 
-1. Copy `.env.example` to `.env` and set `MONGODB_URI` for your MongoDB instance. Set `CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` from the [Clerk Dashboard API keys](https://dashboard.clerk.com/). Set `CLERK_WEBHOOK_SIGNING_SECRET` to the signing secret for the webhook endpoint. Keep both secrets on the backend only.
+1. Copy `.env.example` to `.env` and set `MONGODB_URI` for your MongoDB instance. Set `CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` from the [Clerk Dashboard API keys](https://dashboard.clerk.com/). Set `CLERK_WEBHOOK_SIGNING_SECRET` to the signing secret for the webhook endpoint. To configure Cloudinary, set all three `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` values from the [Cloudinary console](https://cloudinary.com/documentation/node_integration). Keep secrets on the backend only.
 2. Run `npm install`.
 3. Run `npm run dev` for local development, or `npm start` for a normal process.
 
@@ -13,6 +13,8 @@ Configure a public Clerk webhook endpoint at `POST /api/webhooks/clerk` and subs
 The health and Clerk webhook routes are public. Clerk session middleware runs after those routes and before JSON parsing and future protected routes. Future protected routes must use `requireEventNestUser` from `src/middleware/requireEventNestUser.js` first: it resolves the verified Clerk user ID to a local `User` and requires an active account with verified email. Phone verification remains recorded for future features that actually need a phone. `src/middleware/authorization.js` exports `requireRole('attendee' | 'organizer')`, `requireVenueOwner`, and `requireEventOwner`. The owner guards require the organizer role, read `venueId` or `eventId` from route parameters, and compare the resource's `organizerId` to the authenticated local user's `_id`. They return 401 without an authenticated local user, 403 for insufficient roles or foreign ownership, 400 for malformed IDs, and 404 for missing resources. Apply owner guards before handlers that read or modify those resources, and scope later mutation queries to the same owner. No protected product routes have been added.
 
 Webhook tests use a mocked Clerk lookup and an in-memory model; authentication tests use mocked Clerk auth state and local user lookup. Live Clerk token verification, webhook delivery, and MongoDB writes have not been verified.
+
+Cloudinary configuration lives in `src/config/cloudinary.js`. When all three Cloudinary variables are present, startup configures the Node SDK for secure delivery without making a network request. Leaving all three unset keeps the integration dormant; a partial set fails startup with a safe variable-name error. `CLOUDINARY_URL` is not used by this setup. Upload and image routes, asset lifecycle handling, and event/venue image fields are not implemented.
 
 ## Optional-phone index migration
 
@@ -27,6 +29,6 @@ After multiple phone-less users exist, the old unique index cannot be restored w
 
 ## Deploy on Render
 
-Create a Node web service with root directory `backend`, build command `npm ci`, and start command `npm start`. The backend runs directly with Node.js and has no build script. Leave `PORT` unset so Render supplies it. Set `MONGODB_URI`, `CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, and `CLERK_WEBHOOK_SIGNING_SECRET` in the service environment. Use an Atlas connection string for `MONGODB_URI`, not the local address from `.env.example`. Do not commit these values.
+Create a Node web service with root directory `backend`, build command `npm ci`, and start command `npm start`. The backend runs directly with Node.js and has no build script. Leave `PORT` unset so Render supplies it. Set `MONGODB_URI`, `CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, and `CLERK_WEBHOOK_SIGNING_SECRET` in the service environment. Set the three `CLOUDINARY_*` variables together when media support is needed. Use an Atlas connection string for `MONGODB_URI`, not the local address from `.env.example`. Do not commit these values.
 
 The API connects to MongoDB before listening. In Atlas Network Access, allow the service's [Render outbound IP ranges](https://render.com/docs/outbound-ip-addresses) and verify the Atlas database user credentials. Once deployed, check `GET /health`. Startup logs identify missing configuration, MongoDB URI and authentication errors, connection failures, and port conflicts without printing connection strings or secrets. A generic startup error requires further investigation; the actual Render deploy logs and service settings are needed to determine its cause.

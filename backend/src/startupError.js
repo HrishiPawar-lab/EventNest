@@ -4,6 +4,9 @@ const configurationErrors = new Set([
   'CLERK_PUBLISHABLE_KEY is required',
   'CLERK_SECRET_KEY is required',
   'CLERK_WEBHOOK_SIGNING_SECRET is required',
+  'CLOUDINARY_CLOUD_NAME is required when Cloudinary is configured',
+  'CLOUDINARY_API_KEY is required when Cloudinary is configured',
+  'CLOUDINARY_API_SECRET is required when Cloudinary is configured',
 ]);
 
 export function getStartupFailureMessage(error) {

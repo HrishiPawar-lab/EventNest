@@ -1,4 +1,5 @@
 import { loadClerkConfig } from './config/clerk.js';
+import { loadCloudinaryConfig } from './config/cloudinary.js';
 
 export function loadConfig(env = process.env) {
   const port = Number(env.PORT ?? 4000);
@@ -15,5 +16,6 @@ export function loadConfig(env = process.env) {
     port,
     mongodbUri: env.MONGODB_URI.trim(),
     clerk: loadClerkConfig(env),
+    cloudinary: loadCloudinaryConfig(env),
   };
 }
