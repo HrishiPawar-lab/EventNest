@@ -74,7 +74,7 @@ export function VerificationCodeForm({
       {sent && (
         <form onSubmit={handleSubmit(verify)} className="space-y-4" noValidate>
           <div className="space-y-2">
-            <label htmlFor={`${kind}-code`} className="text-sm font-semibold text-slate-800">
+            <label htmlFor={`${kind}-code`} className="text-sm font-medium text-slate-800">
               Verification code
             </label>
             <Input

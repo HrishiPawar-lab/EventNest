@@ -38,7 +38,7 @@ const venues = [
 export function VenueManagementPage() {
   return (
     <OrganizerShell>
-      <main className="mx-auto max-w-6xl px-5 py-9 sm:px-8">
+      <main className="mx-auto max-w-[1280px] px-4 py-7 sm:px-6 lg:px-8">
         <OrganizerHeading
           eyebrow="Places to gather"
           title="Venue management"
@@ -59,10 +59,10 @@ export function VenueManagementPage() {
             >
               <img src={venue.image} alt="" className="aspect-[1.7] w-full object-cover" />
               <div className="p-5">
-                <p className="text-xs font-semibold uppercase tracking-widest text-brand">
+                <p className="text-xs font-medium uppercase tracking-widest text-brand">
                   {venue.type}
                 </p>
-                <h2 className="mt-2 text-xl font-bold">{venue.name}</h2>
+                <h2 className="mt-2 text-xl font-semibold">{venue.name}</h2>
                 <p className="mt-2 flex items-center gap-2 text-sm text-stone-600">
                   <LuMapPin aria-hidden="true" /> {venue.city} ·{' '}
                   {venue.capacity.toLocaleString('en-IN')} capacity
@@ -120,7 +120,7 @@ export function VenueFormPage() {
   })
   return (
     <OrganizerShell>
-      <main className="mx-auto max-w-4xl px-5 py-9 sm:px-8">
+      <main className="mx-auto max-w-5xl px-4 py-7 sm:px-6 lg:px-8">
         <OrganizerHeading
           eyebrow="Venue studio"
           title={editing ? 'Edit venue' : 'Create a venue'}
@@ -140,7 +140,7 @@ export function VenueFormPage() {
           >
             <div className="grid gap-5 sm:grid-cols-2">
               <label className="block sm:col-span-2">
-                <span className="mb-2 block text-sm font-semibold">Venue name</span>
+                <span className="mb-2 block text-sm font-medium">Venue name</span>
                 <Input {...register('name')} placeholder="e.g. Harbour Arena" />
                 {errors.name && (
                   <span role="alert" className="text-xs text-red-700">
@@ -149,7 +149,7 @@ export function VenueFormPage() {
                 )}
               </label>
               <label className="block">
-                <span className="mb-2 block text-sm font-semibold">Venue type</span>
+                <span className="mb-2 block text-sm font-medium">Venue type</span>
                 <select
                   {...register('type')}
                   className="h-11 w-full rounded-lg border border-stone-300 bg-white px-3 text-sm"
@@ -162,7 +162,7 @@ export function VenueFormPage() {
                 </select>
               </label>
               <label className="block">
-                <span className="mb-2 block text-sm font-semibold">Capacity</span>
+                <span className="mb-2 block text-sm font-medium">Capacity</span>
                 <Input type="number" min="1" {...register('capacity')} />
                 {errors.capacity && (
                   <span role="alert" className="text-xs text-red-700">
@@ -172,7 +172,7 @@ export function VenueFormPage() {
               </label>
             </div>
             <label className="block">
-              <span className="mb-2 block text-sm font-semibold">Description</span>
+              <span className="mb-2 block text-sm font-medium">Description</span>
               <textarea
                 {...register('description')}
                 rows={4}
@@ -187,7 +187,7 @@ export function VenueFormPage() {
             </label>
             <div className="grid gap-5 border-t border-stone-100 pt-5 sm:grid-cols-2">
               <label className="block sm:col-span-2">
-                <span className="mb-2 block text-sm font-semibold">Street address</span>
+                <span className="mb-2 block text-sm font-medium">Street address</span>
                 <Input {...register('street')} />
                 {errors.street && (
                   <span role="alert" className="text-xs text-red-700">
@@ -196,7 +196,7 @@ export function VenueFormPage() {
                 )}
               </label>
               <label className="block">
-                <span className="mb-2 block text-sm font-semibold">City</span>
+                <span className="mb-2 block text-sm font-medium">City</span>
                 <Input {...register('city')} />
                 {errors.city && (
                   <span role="alert" className="text-xs text-red-700">
@@ -205,7 +205,7 @@ export function VenueFormPage() {
                 )}
               </label>
               <label className="block">
-                <span className="mb-2 block text-sm font-semibold">State</span>
+                <span className="mb-2 block text-sm font-medium">State</span>
                 <Input {...register('state')} />
                 {errors.state && (
                   <span role="alert" className="text-xs text-red-700">
@@ -214,7 +214,7 @@ export function VenueFormPage() {
                 )}
               </label>
               <label className="block">
-                <span className="mb-2 block text-sm font-semibold">Postal code</span>
+                <span className="mb-2 block text-sm font-medium">Postal code</span>
                 <Input {...register('postalCode')} />
                 {errors.postalCode && (
                   <span role="alert" className="text-xs text-red-700">
@@ -235,10 +235,10 @@ export function VenueFormPage() {
         )}
         {preview && (
           <div role="status" className="mt-6 rounded-xl border border-orange-200 bg-orange-50 p-6">
-            <p className="text-xs font-semibold uppercase tracking-widest text-brand">
+            <p className="text-xs font-medium uppercase tracking-widest text-brand">
               Form preview · not saved
             </p>
-            <h2 className="mt-2 text-2xl font-bold">{preview.name}</h2>
+            <h2 className="mt-2 text-2xl font-semibold">{preview.name}</h2>
             <p className="mt-2 text-sm text-stone-600">
               {preview.city}, {preview.state} · {preview.capacity} places
             </p>

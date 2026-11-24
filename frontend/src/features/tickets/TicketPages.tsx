@@ -9,11 +9,11 @@ const example = sampleEvents[0]
 export function MyTicketsPage() {
   return (
     <SiteShell>
-      <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+      <main className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 lg:px-8">
+        <p className="text-xs font-medium uppercase tracking-[0.2em] text-brand">
           Your experiences
         </p>
-        <h1 className="mt-2 text-4xl font-bold">My tickets</h1>
+        <h1 className="mt-1.5 text-3xl font-semibold tracking-tight sm:text-4xl">My tickets</h1>
         <p className="mt-3 text-stone-600">
           Your confirmed tickets will be here once live booking is available.
         </p>
@@ -34,10 +34,10 @@ export function MyTicketsPage() {
         </div>
         <section className="mt-12">
           <div className="mb-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-brand">
               How it will look
             </p>
-            <h2 className="mt-2 text-2xl font-bold">Ticket preview</h2>
+            <h2 className="mt-2 text-2xl font-semibold">Ticket preview</h2>
           </div>
           <div className="flex max-w-2xl flex-col overflow-hidden rounded-xl border border-stone-200 bg-white sm:flex-row">
             <img
@@ -46,10 +46,10 @@ export function MyTicketsPage() {
               className="h-48 w-full object-cover sm:h-auto sm:w-48"
             />
             <div className="flex-1 p-5">
-              <span className="rounded-md bg-orange-100 px-2 py-1 text-xs font-semibold text-brand-dark">
+              <span className="rounded-md bg-orange-100 px-2 py-1 text-xs font-medium text-brand-dark">
                 EXAMPLE · NOT VALID FOR ENTRY
               </span>
-              <h3 className="mt-3 text-xl font-bold">{example.title}</h3>
+              <h3 className="mt-3 text-xl font-semibold">{example.title}</h3>
               <p className="mt-2 text-sm text-stone-600">
                 {eventDate(example.date)} · {example.venue}
               </p>
@@ -72,7 +72,7 @@ export function TicketDetailsPage() {
     return (
       <SiteShell>
         <main className="mx-auto max-w-4xl px-4 py-24 text-center">
-          <h1 className="text-3xl font-bold">Ticket not found</h1>
+          <h1 className="text-3xl font-semibold">Ticket not found</h1>
           <p className="mt-3 text-stone-600">
             There is no ticket with that reference in this preview.
           </p>
@@ -84,10 +84,10 @@ export function TicketDetailsPage() {
     )
   return (
     <SiteShell>
-      <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         <Link
           to="/tickets"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-stone-600 hover:text-brand"
+          className="inline-flex items-center gap-2 text-sm font-medium text-stone-600 hover:text-brand"
         >
           <LuArrowLeft aria-hidden="true" /> Back to my tickets
         </Link>
@@ -95,10 +95,10 @@ export function TicketDetailsPage() {
           <img src={example.image} alt="" className="aspect-[2.5] w-full object-cover" />
           <div className="grid gap-8 p-6 sm:p-8 md:grid-cols-[1fr_260px]">
             <div>
-              <span className="rounded-md bg-orange-100 px-2 py-1 text-xs font-semibold text-brand-dark">
+              <span className="rounded-md bg-orange-100 px-2 py-1 text-xs font-medium text-brand-dark">
                 EXAMPLE · NOT VALID FOR ENTRY
               </span>
-              <h1 className="mt-4 text-3xl font-bold">{example.title}</h1>
+              <h1 className="mt-4 text-3xl font-semibold">{example.title}</h1>
               <p className="mt-3 text-stone-600">
                 {eventDate(example.date)} · {example.time}
               </p>
@@ -114,7 +114,7 @@ export function TicketDetailsPage() {
             </div>
             <div className="flex min-h-64 flex-col items-center justify-center rounded-lg border border-dashed border-stone-300 bg-paper p-5 text-center">
               <LuQrCode aria-hidden="true" className="size-14 text-stone-400" />
-              <h2 className="mt-4 text-sm font-semibold">QR credential unavailable</h2>
+              <h2 className="mt-4 text-sm font-medium">QR credential unavailable</h2>
               <p className="mt-2 text-xs leading-5 text-stone-600">
                 A secure, unique QR appears only after verified payment and ticket issuance. This
                 preview cannot be scanned.

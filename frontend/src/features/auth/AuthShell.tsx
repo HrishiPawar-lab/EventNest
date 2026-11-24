@@ -12,7 +12,7 @@ export function AuthShell({
 }) {
   return (
     <div className="min-h-screen bg-paper text-ink">
-      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-6 sm:px-8">
+      <header className="mx-auto flex w-full max-w-[1280px] items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
         <Brand />
         <Link
           to="/"
@@ -22,28 +22,26 @@ export function AuthShell({
         </Link>
       </header>
 
-      <main className="mx-auto grid w-full max-w-6xl gap-8 px-5 pb-14 pt-6 lg:grid-cols-[1fr_470px] lg:items-stretch lg:gap-12 lg:px-8 lg:pt-12">
-        <div className="relative flex min-h-72 flex-col justify-end overflow-hidden rounded-xl bg-ink p-8 text-white sm:p-10 lg:min-h-[660px]">
+      <main className="mx-auto grid w-full max-w-[1280px] gap-6 px-4 pb-12 pt-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_440px] lg:items-stretch lg:gap-8 lg:px-8 lg:pt-8">
+        <div className="relative flex min-h-60 flex-col justify-end overflow-hidden rounded-xl bg-ink p-7 text-white sm:p-9 lg:min-h-[560px]">
           <img
             src="/images/concert.jpg"
             alt="Audience enjoying a live concert"
             className="absolute inset-0 size-full object-cover opacity-55"
           />
           <div className="relative">
-            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-orange-200">
+            <p className="mb-3 text-xs font-medium uppercase tracking-[0.14em] text-orange-200">
               {eyebrow}
             </p>
-            <h1 className="max-w-md text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
+            <h1 className="max-w-md text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
               Your next great story starts here.
             </h1>
-            <p className="mt-4 max-w-sm text-base leading-7 text-white/85">
+            <p className="mt-3 max-w-sm text-sm leading-6 text-white/85">
               Discover the moments worth showing up for. All your experiences, one place.
             </p>
           </div>
         </div>
-        <div className="flex min-w-0 items-center rounded-xl border border-stone-200 bg-white p-4 sm:p-8">
-          {children}
-        </div>
+        <div className="flex min-w-0 items-center justify-center">{children}</div>
       </main>
     </div>
   )

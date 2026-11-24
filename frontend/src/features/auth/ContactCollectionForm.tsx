@@ -40,7 +40,7 @@ export function ContactCollectionForm({
   return (
     <form onSubmit={handleSubmit(submit)} className="space-y-4" noValidate>
       <div className="space-y-2">
-        <label htmlFor={`${kind}-contact`} className="text-sm font-semibold text-slate-800">
+        <label htmlFor={`${kind}-contact`} className="text-sm font-medium text-slate-800">
           {isPhone ? 'Mobile number' : 'Email address'}
         </label>
         <Input

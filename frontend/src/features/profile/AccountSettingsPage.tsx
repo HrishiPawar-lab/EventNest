@@ -43,17 +43,19 @@ export function AccountSettingsPage() {
 
   return (
     <SiteShell>
-      <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         <Link
           to="/profile"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-stone-600 hover:text-brand"
+          className="inline-flex items-center gap-2 text-sm font-medium text-stone-600 hover:text-brand"
         >
           <LuArrowLeft aria-hidden="true" /> Back to profile
         </Link>
-        <p className="mt-7 text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+        <p className="mt-7 text-xs font-medium uppercase tracking-[0.2em] text-brand">
           Your account
         </p>
-        <h1 className="mt-2 text-4xl font-bold">Account settings</h1>
+        <h1 className="mt-1.5 text-3xl font-semibold tracking-tight sm:text-4xl">
+          Account settings
+        </h1>
         <p className="mt-3 text-stone-600">Keep your profile and contact details up to date.</p>
         <div className="mt-8 space-y-6">
           <section className="rounded-xl border border-stone-200 bg-white p-6">
@@ -63,7 +65,7 @@ export function AccountSettingsPage() {
             </p>
             <form onSubmit={save} className="mt-6 grid gap-5 sm:grid-cols-2">
               <div>
-                <label htmlFor="first-name" className="mb-2 block text-sm font-semibold">
+                <label htmlFor="first-name" className="mb-2 block text-sm font-medium">
                   First name
                 </label>
                 <Input
@@ -78,7 +80,7 @@ export function AccountSettingsPage() {
                 )}
               </div>
               <div>
-                <label htmlFor="last-name" className="mb-2 block text-sm font-semibold">
+                <label htmlFor="last-name" className="mb-2 block text-sm font-medium">
                   Last name
                 </label>
                 <Input
@@ -122,7 +124,7 @@ export function AccountSettingsPage() {
                     </span>
                   </span>
                 </div>
-                <span className="text-xs font-semibold text-green-800">Verified</span>
+                <span className="text-xs font-medium text-green-800">Verified</span>
               </div>
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
@@ -134,10 +136,7 @@ export function AccountSettingsPage() {
                     </span>
                   </span>
                 </div>
-                <Link
-                  to="/verify-phone"
-                  className="text-xs font-semibold text-brand hover:underline"
-                >
+                <Link to="/verify-phone" className="text-xs font-medium text-brand hover:underline">
                   {user?.primaryPhoneNumber ? 'Manage' : 'Add'}
                 </Link>
               </div>

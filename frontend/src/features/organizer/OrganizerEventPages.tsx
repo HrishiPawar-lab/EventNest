@@ -20,7 +20,7 @@ import { OrganizerHeading, OrganizerShell } from './OrganizerShell'
 export function OrganizerEventsPage() {
   return (
     <OrganizerShell>
-      <main className="mx-auto max-w-6xl px-5 py-9 sm:px-8">
+      <main className="mx-auto max-w-[1280px] px-4 py-7 sm:px-6 lg:px-8">
         <OrganizerHeading
           eyebrow="Your line-up"
           title="My events"
@@ -48,7 +48,7 @@ export function OrganizerEventsPage() {
                 <div className="flex items-center gap-2">
                   <h2 className="truncate text-lg font-semibold">{event.title}</h2>
                   <span
-                    className={`rounded-md px-2 py-0.5 text-xs font-semibold ${index === 0 ? 'bg-orange-100 text-brand-dark' : 'bg-stone-100 text-stone-600'}`}
+                    className={`rounded-md px-2 py-0.5 text-xs font-medium ${index === 0 ? 'bg-orange-100 text-brand-dark' : 'bg-stone-100 text-stone-600'}`}
                   >
                     {index === 0 ? 'Published' : 'Draft'}
                   </span>
@@ -115,7 +115,7 @@ export function EventFormPage() {
   })
   return (
     <OrganizerShell>
-      <main className="mx-auto max-w-4xl px-5 py-9 sm:px-8">
+      <main className="mx-auto max-w-5xl px-4 py-7 sm:px-6 lg:px-8">
         <OrganizerHeading
           eyebrow="Event studio"
           title={editing ? 'Edit event' : 'Create an event'}
@@ -197,10 +197,10 @@ export function EventFormPage() {
         )}
         {preview && (
           <div role="status" className="mt-6 rounded-xl border border-orange-200 bg-orange-50 p-6">
-            <p className="text-xs font-semibold uppercase tracking-widest text-brand">
+            <p className="text-xs font-medium uppercase tracking-widest text-brand">
               Form preview · not saved
             </p>
-            <h2 className="mt-2 text-2xl font-bold">{preview.title}</h2>
+            <h2 className="mt-2 text-2xl font-semibold">{preview.title}</h2>
             <p className="mt-2 text-sm text-stone-600">
               {preview.date} · {preview.venue} · {formatPrice(preview.price)} · {preview.capacity}{' '}
               places
@@ -224,7 +224,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-semibold">{label}</span>
+      <span className="mb-2 block text-sm font-medium">{label}</span>
       {children}
       {error && (
         <span role="alert" className="mt-1 block text-xs text-red-700">
@@ -242,7 +242,7 @@ export function EventManagementPage() {
     return (
       <OrganizerShell>
         <main className="mx-auto max-w-4xl px-5 py-16">
-          <h1 className="text-3xl font-bold">Event not found</h1>
+          <h1 className="text-3xl font-semibold">Event not found</h1>
           <Button asChild className="mt-6">
             <Link to="/organizer/preview/events">My events</Link>
           </Button>
@@ -251,7 +251,7 @@ export function EventManagementPage() {
     )
   return (
     <OrganizerShell>
-      <main className="mx-auto max-w-6xl px-5 py-9 sm:px-8">
+      <main className="mx-auto max-w-[1280px] px-4 py-7 sm:px-6 lg:px-8">
         <OrganizerHeading
           eyebrow="Manage event"
           title={event.title}
@@ -267,7 +267,7 @@ export function EventManagementPage() {
         <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
           <img src={event.image} alt="" className="aspect-[1.8] w-full rounded-xl object-cover" />
           <div className="rounded-xl border border-stone-200 bg-white p-6">
-            <span className="rounded-md bg-orange-100 px-2 py-1 text-xs font-semibold text-brand-dark">
+            <span className="rounded-md bg-orange-100 px-2 py-1 text-xs font-medium text-brand-dark">
               Example event
             </span>
             <div className="mt-5 space-y-4 text-sm">

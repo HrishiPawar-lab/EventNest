@@ -9,6 +9,7 @@ import {
   LuHouse,
   LuLogOut,
   LuMenu,
+  LuSearch,
   LuTicket,
   LuUserRound,
 } from 'react-icons/lu'
@@ -42,7 +43,7 @@ export function Brand({ light = false }: { light?: boolean }) {
 
 export function PreviewNotice({ children }: { children?: ReactNode }) {
   return (
-    <p className="border-b border-orange-200 bg-orange-50 px-4 py-2 text-center text-xs font-medium text-stone-700">
+    <p className="border-b border-orange-100 bg-orange-50 px-4 py-1.5 text-center text-[11px] font-normal text-stone-600">
       {children ||
         'Explore a preview of EventNest. Event listings, bookings, and organizer metrics shown here are examples.'}
     </p>
@@ -76,28 +77,34 @@ export function SiteShell({
     <div className="min-h-screen bg-paper text-ink">
       {preview && <PreviewNotice />}
       <header className="sticky top-0 z-30 border-b border-stone-200 bg-white">
-        <div className="mx-auto flex h-18 max-w-7xl items-center justify-between gap-5 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <Brand />
-          <nav aria-label="Main navigation" className="hidden items-center gap-1 md:flex">
+          <nav aria-label="Main navigation" className="hidden items-center gap-1 lg:flex">
             {links.map(({ to, label, icon: Icon }) => (
               <NavLink
                 key={to}
                 to={to}
                 end={to === '/'}
                 className={({ isActive }) =>
-                  `flex items-center gap-2 border-b-2 px-3.5 py-6 text-[15px] font-medium transition-colors ${isActive ? 'border-brand text-ink' : 'border-transparent text-stone-600 hover:text-ink'}`
+                  `flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${isActive ? 'bg-orange-50 text-brand-dark' : 'text-stone-600 hover:bg-stone-50 hover:text-ink'}`
                 }
               >
                 <Icon aria-hidden="true" className="size-4" /> {label}
               </NavLink>
             ))}
           </nav>
-          <div className="hidden items-center gap-3 md:flex">
+          <Link
+            to="/search"
+            className="hidden items-center gap-2 rounded-lg border border-stone-200 bg-paper px-3 py-2 text-sm font-normal text-stone-500 hover:border-stone-300 hover:text-ink xl:inline-flex"
+          >
+            <LuSearch aria-hidden="true" className="size-4" /> Search events
+          </Link>
+          <div className="hidden items-center gap-3 lg:flex">
             {isLoaded && isSignedIn ? (
               <details className="group relative">
                 <summary
                   aria-label="Account menu"
-                  className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-stone-200 bg-white px-2 py-1.5 text-[15px] font-medium hover:border-stone-400"
+                  className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-stone-200 bg-white px-2 py-1.5 text-sm font-medium hover:border-stone-400"
                 >
                   <span className="flex size-8 items-center justify-center rounded-full bg-ink text-white">
                     {user?.imageUrl ? (
@@ -139,7 +146,7 @@ export function SiteShell({
               <>
                 <Link
                   to={`/sign-in?return_to=${encodeURIComponent(location.pathname + location.search)}`}
-                  className="text-[15px] font-medium"
+                  className="text-sm font-medium"
                 >
                   Sign in
                 </Link>
@@ -156,7 +163,7 @@ export function SiteShell({
             aria-label="Toggle navigation"
             aria-expanded={mobileOpen}
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="rounded-lg border border-stone-200 p-2 md:hidden"
+            className="rounded-lg border border-stone-200 p-2 lg:hidden"
           >
             <LuMenu aria-hidden="true" className="size-5" />
           </button>
@@ -164,7 +171,7 @@ export function SiteShell({
         {mobileOpen && (
           <nav
             aria-label="Mobile navigation"
-            className="border-t border-stone-200 bg-white p-3 md:hidden"
+            className="border-t border-stone-200 bg-white p-3 lg:hidden"
           >
             {links.map(({ to, label, icon: Icon }) => (
               <Link
@@ -176,6 +183,13 @@ export function SiteShell({
                 <Icon aria-hidden="true" className="size-4 text-brand" /> {label}
               </Link>
             ))}
+            <Link
+              to="/search"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-stone-100"
+            >
+              <LuSearch aria-hidden="true" className="size-4 text-brand" /> Search events
+            </Link>
             <Link
               to={isSignedIn ? '/profile' : '/sign-in'}
               onClick={() => setMobileOpen(false)}
@@ -197,7 +211,7 @@ export function SiteShell({
       </header>
       {children}
       <footer className="border-t border-stone-200 bg-white">
-        <div className="mx-auto flex max-w-7xl flex-col justify-between gap-3 px-4 py-8 text-sm text-stone-500 sm:flex-row sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-[1440px] flex-col justify-between gap-3 px-4 py-7 text-sm text-stone-500 sm:flex-row sm:px-6 lg:px-8">
           <Brand />
           <p>Good things happen together. © {new Date().getFullYear()} EventNest.</p>
         </div>

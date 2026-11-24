@@ -12,7 +12,7 @@ const sampleGuests = [
 export function AttendeeManagementPage() {
   return (
     <OrganizerShell>
-      <main className="mx-auto max-w-6xl px-5 py-9 sm:px-8">
+      <main className="mx-auto max-w-[1280px] px-4 py-7 sm:px-6 lg:px-8">
         <OrganizerHeading
           eyebrow="Your community"
           title="Attendee management"
@@ -56,7 +56,7 @@ export function AttendeeManagementPage() {
                     <td className="px-5 py-4">{guest.tickets}</td>
                     <td className="px-5 py-4">
                       <span
-                        className={`rounded-md px-2 py-1 text-xs font-semibold ${guest.status === 'Checked in' ? 'bg-green-50 text-green-800' : 'bg-orange-100 text-brand-dark'}`}
+                        className={`rounded-md px-2 py-1 text-xs font-medium ${guest.status === 'Checked in' ? 'bg-green-50 text-green-800' : 'bg-orange-100 text-brand-dark'}`}
                       >
                         {guest.status}
                       </span>
@@ -83,7 +83,7 @@ export function AttendeeManagementPage() {
 export function CheckInPage() {
   return (
     <OrganizerShell>
-      <main className="mx-auto max-w-5xl px-5 py-9 sm:px-8">
+      <main className="mx-auto max-w-5xl px-4 py-7 sm:px-6 lg:px-8">
         <OrganizerHeading
           eyebrow="At the door"
           title="QR check-in"
@@ -99,7 +99,7 @@ export function CheckInPage() {
             <div className="mt-6 flex aspect-square max-h-88 items-center justify-center rounded-lg border border-dashed border-stone-300 bg-paper">
               <div className="text-center">
                 <LuScanLine aria-hidden="true" className="mx-auto size-14 text-stone-400" />
-                <p className="mt-3 text-sm font-semibold">Camera preview unavailable</p>
+                <p className="mt-3 text-sm font-medium">Camera preview unavailable</p>
               </div>
             </div>
             <Button disabled className="mt-6 w-full">
@@ -114,12 +114,12 @@ export function CheckInPage() {
               backend to validate an opaque QR credential and atomically update ticket status.
             </p>
             <div className="mt-6 border-t border-orange-200 pt-5">
-              <p className="text-sm font-semibold">
+              <p className="text-sm font-medium">
                 No valid ticket credentials exist in this preview.
               </p>
               <Link
                 to="/organizer/preview/attendees"
-                className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-brand"
+                className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-brand"
               >
                 View attendee preview <LuArrowRight aria-hidden="true" />
               </Link>

@@ -83,8 +83,8 @@ export function CategoryIcon({ category }: { category: EventCategory }) {
 
 export function EventCard({ event }: { event: Event }) {
   return (
-    <article className="group flex min-w-0 flex-col overflow-hidden rounded-xl border border-stone-200 bg-white">
-      <div className="relative aspect-[4/5] overflow-hidden">
+    <article className="group flex min-w-0 flex-col overflow-hidden rounded-xl border border-stone-200 bg-white transition-[border-color,box-shadow] duration-200 hover:border-stone-300 hover:shadow-sm">
+      <div className="relative aspect-[3/4] overflow-hidden bg-stone-100">
         <Link
           to={`/events/${event.id}`}
           aria-label={`View ${event.title}`}
@@ -94,35 +94,35 @@ export function EventCard({ event }: { event: Event }) {
             src={event.image}
             alt=""
             loading="lazy"
-            className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.025]"
+            className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
         </Link>
         <WishlistButton eventId={event.id} className="absolute right-3 top-3" />
-        <span className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-md bg-white px-2.5 py-1.5 text-xs font-medium text-ink">
+        <span className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-md bg-white px-2.5 py-1 text-xs font-medium text-ink">
           <CategoryIcon category={event.category} /> {event.category}
         </span>
       </div>
-      <div className="flex flex-1 flex-col px-4 pb-4 pt-3.5">
-        <p className="flex items-center gap-1.5 text-sm font-medium text-brand-dark">
+      <div className="flex flex-1 flex-col px-4 pb-4 pt-3">
+        <p className="flex items-center gap-1.5 text-xs font-medium text-brand-dark">
           <LuCalendarDays aria-hidden="true" className="size-3.5 shrink-0" />
           {eventDate(event.date)} · {event.time}
         </p>
         <Link
           to={`/events/${event.id}`}
-          className="mt-2 line-clamp-2 min-h-12 text-[17px] font-semibold leading-6 text-ink hover:text-brand"
+          className="mt-2 line-clamp-2 min-h-11 text-[16px] font-semibold leading-[1.4] text-ink hover:text-brand"
         >
           {event.title}
         </Link>
-        <p className="mb-3 mt-1.5 flex items-start gap-1.5 text-[15px] leading-5 text-stone-600">
+        <p className="mb-3 mt-1 flex items-start gap-1.5 text-[13px] leading-5 text-stone-600">
           <LuMapPin aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
           <span className="line-clamp-1">
             {event.venue}, {event.city}
           </span>
         </p>
-        <div className="mt-auto flex items-center gap-1.5 border-t border-stone-100 pt-3 text-stone-600">
+        <div className="mt-auto flex items-baseline gap-1.5 border-t border-stone-100 pt-3 text-stone-600">
           <LuTicket aria-hidden="true" className="size-4 shrink-0 text-brand" />
-          <span className="text-[15px] font-semibold text-ink">{formatPrice(event.price)}</span>
-          <span className="text-sm">per ticket</span>
+          <span className="text-sm font-medium text-ink">{formatPrice(event.price)}</span>
+          <span className="text-xs">per ticket</span>
         </div>
       </div>
     </article>

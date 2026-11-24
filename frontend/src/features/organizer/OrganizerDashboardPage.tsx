@@ -5,16 +5,16 @@ import { eventDate, sampleEvents } from '../events/catalog'
 import { OrganizerHeading, OrganizerShell } from './OrganizerShell'
 
 const stats = [
-  { label: 'Tickets sold', value: '1,240', icon: LuTicket, note: 'Illustrative' },
-  { label: 'Events hosted', value: '12', icon: LuCalendarDays, note: 'Illustrative' },
-  { label: 'Total attendees', value: '8.4k', icon: LuUsers, note: 'Illustrative' },
+  { label: 'Tickets sold', value: '1,240', icon: LuTicket },
+  { label: 'Events hosted', value: '12', icon: LuCalendarDays },
+  { label: 'Total attendees', value: '8.4k', icon: LuUsers },
 ]
 const bars = [34, 44, 51, 47, 62, 58, 72, 67, 84, 76, 93, 88]
 
 export function OrganizerDashboardPage() {
   return (
     <OrganizerShell>
-      <main className="mx-auto max-w-6xl px-5 py-9 sm:px-8">
+      <main className="mx-auto max-w-[1280px] px-4 py-7 sm:px-6 lg:px-8">
         <OrganizerHeading
           eyebrow="Workspace overview"
           title="Organizer dashboard"
@@ -28,12 +28,20 @@ export function OrganizerDashboardPage() {
           }
         />
         <div className="grid gap-4 sm:grid-cols-3">
-          {stats.map(({ label, value, icon: Icon, note }) => (
-            <div key={label} className="rounded-xl border border-stone-200 bg-white p-5">
-              <Icon aria-hidden="true" className="size-6 text-brand" />
-              <p className="mt-4 text-3xl font-bold">{value}</p>
-              <p className="mt-1 text-sm font-semibold">{label}</p>
-              <p className="mt-2 text-xs text-stone-500">{note}</p>
+          {stats.map(({ label, value, icon: Icon }) => (
+            <div
+              key={label}
+              className="flex items-start justify-between rounded-xl border border-stone-200 bg-white p-5"
+            >
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
+                  {label}
+                </p>
+                <p className="mt-2 text-2xl font-semibold tracking-tight">{value}</p>
+              </div>
+              <span className="flex size-9 items-center justify-center rounded-lg bg-orange-50 text-brand">
+                <Icon aria-hidden="true" className="size-5" />
+              </span>
             </div>
           ))}
         </div>
@@ -46,7 +54,7 @@ export function OrganizerDashboardPage() {
                   Illustrative ticket activity over 12 months
                 </p>
               </div>
-              <span className="rounded-md bg-orange-100 px-2 py-1 text-xs font-semibold text-brand-dark">
+              <span className="rounded-md bg-orange-100 px-2 py-1 text-xs font-medium text-brand-dark">
                 Preview
               </span>
             </div>
@@ -72,16 +80,16 @@ export function OrganizerDashboardPage() {
           <section className="rounded-xl border border-stone-200 bg-white p-6">
             <h2 className="text-lg font-semibold">Upcoming in your workspace</h2>
             <p className="mt-1 text-sm text-stone-500">Example events for layout preview</p>
-            <div className="mt-5 space-y-4">
+            <div className="mt-5 divide-y divide-stone-100">
               {sampleEvents.slice(0, 3).map((event) => (
                 <Link
                   key={event.id}
                   to={`/organizer/preview/events/${event.id}`}
-                  className="flex items-center gap-3 rounded-lg hover:bg-stone-50"
+                  className="flex items-center gap-3 py-3 first:pt-0 hover:bg-stone-50"
                 >
                   <img src={event.image} alt="" className="size-14 rounded-md object-cover" />
                   <span className="min-w-0">
-                    <strong className="block truncate text-sm">{event.title}</strong>
+                    <strong className="block truncate text-sm font-medium">{event.title}</strong>
                     <span className="text-xs text-stone-500">{eventDate(event.date)}</span>
                   </span>
                 </Link>
@@ -89,7 +97,7 @@ export function OrganizerDashboardPage() {
             </div>
             <Link
               to="/organizer/preview/events"
-              className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-brand"
+              className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-brand"
             >
               View all events <LuArrowRight aria-hidden="true" />
             </Link>
@@ -97,7 +105,7 @@ export function OrganizerDashboardPage() {
         </div>
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-xl bg-ink p-6 text-white">
           <div>
-            <h2 className="text-xl font-bold">Set the stage for something great.</h2>
+            <h2 className="text-xl font-semibold">Set the stage for something great.</h2>
             <p className="mt-1 text-sm text-white/70">
               Start with a venue, then shape your event around it.
             </p>

@@ -11,9 +11,9 @@ export function WishlistPage() {
   const saved = sampleEvents.filter((event) => ids.includes(event.id))
   return (
     <SiteShell>
-      <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">Saved moments</p>
-        <h1 className="mt-2 text-4xl font-bold">Your wishlist</h1>
+      <main className="mx-auto max-w-[1440px] px-4 py-8 sm:px-6 lg:px-8">
+        <p className="text-xs font-medium uppercase tracking-[0.2em] text-brand">Saved moments</p>
+        <h1 className="mt-1.5 text-3xl font-semibold tracking-tight sm:text-4xl">Your wishlist</h1>
         <p className="mt-3 text-stone-600">
           Keep interesting events close while you plan what is next.
         </p>

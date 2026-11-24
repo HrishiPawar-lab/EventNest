@@ -11,12 +11,12 @@ function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
 
 function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
   return (
-    <h1 className={cn('text-2xl font-bold tracking-tight text-slate-900', className)} {...props} />
+    <h1 className={cn('text-2xl font-semibold tracking-tight text-ink', className)} {...props} />
   )
 }
 
 function CardDescription({ className, ...props }: HTMLAttributes<HTMLParagraphElement>) {
-  return <p className={cn('text-sm leading-6 text-slate-600', className)} {...props} />
+  return <p className={cn('text-sm leading-6 text-stone-600', className)} {...props} />
 }
 
 function CardContent({ className, ...props }: HTMLAttributes<HTMLDivElement>) {

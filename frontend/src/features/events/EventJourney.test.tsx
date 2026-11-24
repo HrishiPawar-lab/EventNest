@@ -60,14 +60,27 @@ describe('public event journey', () => {
     )
   })
 
+  it('filters events from category shortcuts and can restore the full list', async () => {
+    const user = userEvent.setup()
+    renderJourney('/explore')
+
+    await user.click(screen.getByRole('button', { name: 'Food' }))
+    expect(screen.getByRole('button', { name: 'Food' }).getAttribute('aria-pressed')).toBe('true')
+    expect(screen.getByRole('link', { name: 'View Street Food Social' })).toBeTruthy()
+    expect(screen.queryByRole('link', { name: 'View Afterglow Live' })).toBeNull()
+
+    await user.click(screen.getByRole('button', { name: 'All events' }))
+    expect(screen.getByRole('link', { name: 'View Afterglow Live' })).toBeTruthy()
+  })
+
   it('keeps selected tickets through the guest sign-in redirect', async () => {
     const user = userEvent.setup()
     renderJourney()
     await user.click(screen.getByRole('link', { name: 'View Afterglow Live' }))
     await user.click(screen.getByRole('button', { name: 'Add one ticket' }))
     await user.click(screen.getByRole('button', { name: 'Add one ticket' }))
-    expect(screen.getByText('₹7,497')).toBeTruthy()
-    await user.click(screen.getByRole('link', { name: 'Review tickets' }))
+    expect(screen.getAllByText('₹7,497')).toHaveLength(2)
+    await user.click(screen.getAllByRole('link', { name: 'Review tickets' })[0])
     expect(screen.getByText('3 tickets')).toBeTruthy()
     await user.click(screen.getByRole('link', { name: 'Sign in to continue' }))
     await waitFor(() =>

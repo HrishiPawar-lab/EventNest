@@ -19,7 +19,7 @@ const months = [
 export function OrganizerAnalyticsPage() {
   return (
     <OrganizerShell>
-      <main className="mx-auto max-w-6xl px-5 py-9 sm:px-8">
+      <main className="mx-auto max-w-[1280px] px-4 py-7 sm:px-6 lg:px-8">
         <OrganizerHeading
           eyebrow="The bigger picture"
           title="Sales & analytics"
@@ -27,13 +27,15 @@ export function OrganizerAnalyticsPage() {
         />
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {metrics.map(({ label, value, icon: Icon }) => (
-            <div key={label} className="rounded-xl border border-stone-200 bg-white p-5">
-              <div className="flex justify-between">
-                <Icon aria-hidden="true" className="size-6 text-brand" />
-                <LuArrowUpRight aria-hidden="true" className="text-stone-400" />
+            <div key={label} className="rounded-xl border border-stone-200 bg-white p-4">
+              <div className="flex items-center justify-between">
+                <span className="flex size-9 items-center justify-center rounded-lg bg-orange-50 text-brand">
+                  <Icon aria-hidden="true" className="size-5" />
+                </span>
+                <LuArrowUpRight aria-hidden="true" className="size-4 text-stone-400" />
               </div>
-              <p className="mt-5 text-2xl font-bold">{value}</p>
-              <p className="mt-1 text-sm text-stone-500">{label}</p>
+              <p className="mt-4 text-2xl font-semibold tracking-tight">{value}</p>
+              <p className="mt-1 text-xs text-stone-500">{label}</p>
             </div>
           ))}
         </div>
@@ -51,7 +53,7 @@ export function OrganizerAnalyticsPage() {
                   key={month.name}
                   className="flex flex-1 flex-col items-center justify-end gap-2"
                 >
-                  <span className="text-xs font-semibold">{month.value}k</span>
+                  <span className="text-xs font-medium">{month.value}k</span>
                   <div
                     className="w-full rounded-t-md bg-brand"
                     style={{ height: `${month.value * 2.4}px` }}
@@ -65,16 +67,16 @@ export function OrganizerAnalyticsPage() {
             <h2 className="text-xl font-semibold">Useful signals</h2>
             <div className="mt-6 space-y-5">
               <div>
-                <p className="text-sm font-semibold">Most popular category</p>
-                <p className="mt-1 text-2xl font-bold">Live music</p>
+                <p className="text-sm font-medium">Most popular category</p>
+                <p className="mt-1 text-xl font-semibold">Live music</p>
               </div>
               <div className="border-t border-stone-100 pt-5">
-                <p className="text-sm font-semibold">Returning attendees</p>
-                <p className="mt-1 text-2xl font-bold">28%</p>
+                <p className="text-sm font-medium">Returning attendees</p>
+                <p className="mt-1 text-xl font-semibold">28%</p>
               </div>
               <div className="border-t border-stone-100 pt-5">
-                <p className="text-sm font-semibold">Average order size</p>
-                <p className="mt-1 text-2xl font-bold">2 tickets</p>
+                <p className="text-sm font-medium">Average order size</p>
+                <p className="mt-1 text-xl font-semibold">2 tickets</p>
               </div>
             </div>
           </section>

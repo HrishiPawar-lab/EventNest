@@ -51,22 +51,22 @@ export function ExplorePage({ searchResults = false }: { searchResults?: boolean
 
   return (
     <SiteShell>
-      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-brand">
+      <main className="mx-auto max-w-[1440px] px-4 py-7 sm:px-6 lg:px-8">
+        <div className="mb-5">
+          <p className="text-xs font-medium uppercase tracking-[0.14em] text-brand">
             Find your next moment
           </p>
-          <h1 className="mt-2 text-4xl font-semibold tracking-tight sm:text-5xl">
+          <h1 className="mt-1.5 text-3xl font-semibold tracking-tight sm:text-4xl">
             {searchResults ? 'Search results' : 'Explore events'}
           </h1>
-          <p className="mt-3 max-w-xl text-stone-600">
+          <p className="mt-1.5 max-w-xl text-sm text-stone-600">
             Discover live music, food, sport, ideas and more across the city.
           </p>
         </div>
         <form
           role="search"
           onSubmit={handleSubmit(({ query: value }) => update('q', value))}
-          className="mb-8 flex max-w-2xl items-center gap-2 rounded-lg border border-stone-300 bg-white p-1.5 focus-within:ring-2 focus-within:ring-brand"
+          className="mb-5 flex max-w-2xl items-center gap-2 rounded-lg border border-stone-300 bg-white p-1 focus-within:ring-2 focus-within:ring-brand"
         >
           <LuSearch aria-hidden="true" className="ml-3 size-5 text-stone-500" />
           <input
@@ -80,22 +80,43 @@ export function ExplorePage({ searchResults = false }: { searchResults?: boolean
             Search
           </Button>
         </form>
+        <div aria-label="Browse categories" className="mb-6 flex gap-2 overflow-x-auto pb-1">
+          <button
+            type="button"
+            aria-pressed={!category}
+            onClick={() => update('category', '')}
+            className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium ${!category ? 'border-brand bg-orange-50 text-brand-dark' : 'border-stone-200 bg-white text-stone-600 hover:border-stone-400'}`}
+          >
+            All events
+          </button>
+          {categories.map((item) => (
+            <button
+              key={item}
+              type="button"
+              aria-pressed={category === item}
+              onClick={() => update('category', item)}
+              className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium ${category === item ? 'border-brand bg-orange-50 text-brand-dark' : 'border-stone-200 bg-white text-stone-600 hover:border-stone-400'}`}
+            >
+              {item}
+            </button>
+          ))}
+        </div>
         <button
           type="button"
           aria-expanded={filtersOpen}
           aria-controls="event-filters"
           onClick={() => setFiltersOpen(!filtersOpen)}
-          className="mb-5 flex w-full items-center justify-between rounded-lg border border-stone-300 bg-white px-4 py-3 text-[15px] font-medium lg:hidden"
+          className="mb-4 flex w-full items-center justify-between rounded-lg border border-stone-300 bg-white px-4 py-2.5 text-sm font-medium lg:hidden"
         >
           <span className="flex items-center gap-2">
             <LuSlidersHorizontal aria-hidden="true" /> Filters
           </span>
           <span className="text-brand">{filtersOpen ? 'Hide' : 'Show'}</span>
         </button>
-        <div className="grid gap-8 lg:grid-cols-[230px_1fr]">
+        <div className="grid gap-6 lg:grid-cols-[210px_minmax(0,1fr)]">
           <aside
             id="event-filters"
-            className={`h-fit rounded-xl border border-stone-200 bg-white p-5 ${filtersOpen ? '' : 'hidden lg:block'}`}
+            className={`h-fit rounded-xl border border-stone-200 bg-white p-4 lg:sticky lg:top-20 ${filtersOpen ? '' : 'hidden lg:block'}`}
           >
             <div className="flex items-center justify-between">
               <h2 className="flex items-center gap-2 text-lg font-semibold">
@@ -173,8 +194,8 @@ export function ExplorePage({ searchResults = false }: { searchResults?: boolean
             </div>
           </aside>
           <div>
-            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-              <p className="text-[15px] text-stone-600">
+            <div className="mb-4 flex items-center justify-between gap-2">
+              <p className="min-w-0 truncate text-sm text-stone-600">
                 <span className="font-semibold text-ink">{visible.length}</span>{' '}
                 {visible.length === 1 ? 'sample event' : 'sample events'} found{' '}
                 {query && (
@@ -183,12 +204,12 @@ export function ExplorePage({ searchResults = false }: { searchResults?: boolean
                   </>
                 )}
               </p>
-              <label className="flex items-center gap-2 text-[15px] text-stone-600">
+              <label className="flex shrink-0 items-center gap-2 text-sm text-stone-600">
                 Sort by
                 <select
                   value={sort}
                   onChange={(event) => update('sort', event.target.value)}
-                  className="h-10 rounded-lg border border-stone-300 bg-white px-3 text-[15px] font-medium text-ink"
+                  className="h-9 rounded-lg border border-stone-300 bg-white px-2.5 text-sm font-medium text-ink"
                 >
                   <option value="date">Soonest</option>
                   <option value="price">Lowest price</option>

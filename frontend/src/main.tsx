@@ -40,7 +40,7 @@ if (!publishableKey) {
   appRoot.render(
     <main className="flex min-h-screen items-center justify-center bg-paper px-5 text-center text-ink">
       <div className="max-w-md rounded-xl border border-stone-200 bg-white p-8">
-        <h1 className="text-xl font-bold">EventNest needs its Clerk publishable key</h1>
+        <h1 className="text-xl font-semibold">EventNest needs its Clerk publishable key</h1>
         <p className="mt-3 text-sm text-stone-600">
           Set VITE_CLERK_PUBLISHABLE_KEY in frontend/.env.local and restart Vite.
         </p>

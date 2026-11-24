@@ -25,51 +25,56 @@ export function BecomeOrganizerPage() {
   return (
     <SiteShell>
       <main>
-        <section className="bg-ink px-4 py-16 text-white sm:px-6 lg:py-20">
-          <div className="mx-auto max-w-6xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-200">
-              For the people who bring us together
-            </p>
-            <h1 className="mt-4 max-w-2xl text-4xl font-bold leading-tight sm:text-6xl">
-              Make your next event happen.
-            </h1>
-            <p className="mt-5 max-w-xl text-lg leading-7 text-white/75">
-              One account can be both an attendee and an organizer. Build a place, plan an
-              experience and welcome your crowd.
-            </p>
-            <Button asChild className="mt-8">
-              <Link to="/organizer/preview">
-                Explore organizer workspace <LuArrowRight aria-hidden="true" />
-              </Link>
-            </Button>
+        <section className="bg-ink px-4 py-10 text-white sm:px-6 lg:py-14">
+          <div className="mx-auto grid max-w-[1280px] items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-[0.14em] text-orange-200">
+                For the people who bring us together
+              </p>
+              <h1 className="mt-3 max-w-2xl text-3xl font-semibold leading-tight sm:text-4xl">
+                Make your next event happen.
+              </h1>
+              <p className="mt-4 max-w-xl text-base leading-7 text-white/75">
+                One account can be both an attendee and an organizer. Build a place, plan an
+                experience and welcome your crowd.
+              </p>
+              <Button asChild className="mt-7">
+                <Link to="/organizer/preview">
+                  Explore organizer workspace <LuArrowRight aria-hidden="true" />
+                </Link>
+              </Button>
+            </div>
+            <img
+              src="/images/stage.jpg"
+              alt="Musician performing in front of a live audience"
+              className="aspect-[1.8] w-full rounded-xl object-cover"
+            />
           </div>
         </section>
-        <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
-            How it works
-          </p>
-          <h2 className="mt-2 text-3xl font-bold">From idea to open doors</h2>
-          <div className="mt-7 grid gap-5 md:grid-cols-3">
+        <section className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6 lg:px-8">
+          <p className="text-xs font-medium uppercase tracking-[0.2em] text-brand">How it works</p>
+          <h2 className="mt-2 text-3xl font-semibold">From idea to open doors</h2>
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
             {steps.map(({ title, text, icon: Icon }, index) => (
-              <div key={title} className="rounded-xl border border-stone-200 bg-white p-6">
+              <div key={title} className="rounded-xl border border-stone-200 bg-white p-5">
                 <div className="flex items-center justify-between">
                   <Icon aria-hidden="true" className="size-7 text-brand" />
-                  <span className="text-xs font-semibold text-stone-400">0{index + 1}</span>
+                  <span className="text-xs font-medium text-stone-400">0{index + 1}</span>
                 </div>
-                <h3 className="mt-7 text-lg font-semibold">{title}</h3>
+                <h3 className="mt-5 text-lg font-semibold">{title}</h3>
                 <p className="mt-2 text-sm leading-6 text-stone-600">{text}</p>
               </div>
             ))}
           </div>
         </section>
-        <section className="mx-auto max-w-6xl px-4 pb-14 sm:px-6">
+        <section className="mx-auto max-w-[1280px] px-4 pb-10 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-start gap-4 rounded-xl border border-orange-200 bg-orange-50 p-6">
             <LuShieldAlert aria-hidden="true" className="size-6 text-brand" />
             <div className="flex-1">
-              <h2 className="font-semibold">Organizer access is not available yet</h2>
+              <h2 className="font-semibold">Organizer onboarding is not connected yet</h2>
               <p className="mt-1 text-sm leading-6 text-stone-700">
-                The current backend has no endpoint to grant organizer permissions or create venues
-                and events. You can explore the preview workspace; no records will be changed.
+                You can explore the workspace preview. Organizer access and its live management
+                screens are not connected in this frontend, so no records will be changed.
               </p>
             </div>
           </div>
@@ -84,7 +89,7 @@ export function OrganizerAccessDeniedPage() {
     <SiteShell>
       <main className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6">
         <LuShieldAlert aria-hidden="true" className="mx-auto size-10 text-brand" />
-        <h1 className="mt-5 text-3xl font-bold">Organizer access required</h1>
+        <h1 className="mt-5 text-3xl font-semibold">Organizer access required</h1>
         <p className="mt-3 text-stone-600">
           This action is available to accounts with organizer permissions. You can still explore the
           sample workspace.

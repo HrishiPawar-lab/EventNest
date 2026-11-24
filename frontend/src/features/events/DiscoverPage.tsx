@@ -5,11 +5,26 @@ import { Link, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 import { SiteShell } from '../../components/layout/SiteShell'
 import { Button } from '../../components/ui/button'
-import { categories, sampleEvents } from './catalog'
+import { categories, sampleEvents, type Event } from './catalog'
 import { CategoryIcon, EventCard } from './EventCard'
 
 const searchSchema = z.object({ query: z.string().trim().max(100) })
 type SearchValues = z.infer<typeof searchSchema>
+
+function EventRail({ events }: { events: Event[] }) {
+  return (
+    <div className="-mr-4 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 pr-4 sm:mr-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:pr-0 lg:grid-cols-4">
+      {events.map((event) => (
+        <div
+          key={event.id}
+          className="w-[72vw] max-w-[300px] shrink-0 snap-start sm:w-auto sm:max-w-none"
+        >
+          <EventCard event={event} />
+        </div>
+      ))}
+    </div>
+  )
+}
 
 export function DiscoverPage() {
   const navigate = useNavigate()
@@ -30,27 +45,27 @@ export function DiscoverPage() {
             alt=""
             className="absolute inset-0 -z-10 size-full object-cover opacity-55"
           />
-          <div className="mx-auto max-w-7xl px-4 pb-16 pt-16 sm:px-6 sm:pb-20 sm:pt-20 lg:px-8 lg:py-24">
-            <p className="mb-5 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-orange-200">
+          <div className="mx-auto max-w-[1440px] px-4 py-14 sm:px-6 sm:py-16 lg:px-8 lg:py-18">
+            <p className="mb-4 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.14em] text-orange-200">
               <LuSparkles aria-hidden="true" /> Experiences worth showing up for
             </p>
-            <h1 className="max-w-2xl text-5xl font-semibold leading-[1.08] tracking-tight sm:text-6xl">
+            <h1 className="max-w-2xl text-4xl font-semibold leading-[1.1] tracking-tight sm:text-5xl">
               Discover unforgettable <span className="text-brand">events.</span>
             </h1>
-            <p className="mt-6 max-w-lg text-base leading-7 text-white/85 sm:text-lg">
+            <p className="mt-4 max-w-lg text-[15px] leading-6 text-white/85 sm:text-base">
               The best nights, new ideas, great food, and everything in between. Find your next
               moment here.
             </p>
             <form
               onSubmit={search}
               role="search"
-              className="mt-9 flex max-w-xl items-center rounded-lg bg-white p-1.5 text-ink focus-within:ring-2 focus-within:ring-brand"
+              className="mt-7 flex max-w-xl items-center rounded-lg bg-white p-1.5 text-ink focus-within:ring-2 focus-within:ring-brand"
             >
               <LuSearch aria-hidden="true" className="ml-3 size-5 shrink-0 text-stone-500" />
               <input
                 {...register('query')}
                 aria-label="Search events"
-                placeholder="Search events, places or artists"
+                placeholder="Search events"
                 maxLength={100}
                 className="min-w-0 flex-1 px-3 py-2 text-[15px] outline-none"
               />
@@ -58,12 +73,12 @@ export function DiscoverPage() {
                 Search <LuArrowRight aria-hidden="true" />
               </Button>
             </form>
-            <div className="mt-5 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-2">
               {categories.slice(0, 5).map((category) => (
                 <Link
                   key={category}
                   to={`/explore?category=${encodeURIComponent(category)}`}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-white/35 px-3 py-1.5 text-[13px] font-medium text-white hover:border-brand hover:bg-brand"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/40 px-3 py-1.5 text-xs font-medium text-white hover:border-brand hover:bg-brand"
                 >
                   <CategoryIcon category={category} /> {category}
                 </Link>
@@ -72,13 +87,13 @@ export function DiscoverPage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
-          <div className="mb-6 flex items-end justify-between gap-4">
+        <section className="mx-auto max-w-[1440px] px-4 py-10 sm:px-6 lg:px-8">
+          <div className="mb-5 flex items-end justify-between gap-4">
             <div>
               <p className="mb-2 text-xs font-medium uppercase tracking-[0.18em] text-brand">
                 Handpicked for you
               </p>
-              <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+              <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
                 This season's highlights
               </h2>
             </div>
@@ -89,11 +104,7 @@ export function DiscoverPage() {
               Explore all <LuArrowRight aria-hidden="true" />
             </Link>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {sampleEvents.slice(0, 4).map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
-          </div>
+          <EventRail events={sampleEvents.slice(0, 4)} />
           <Link
             to="/explore"
             className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-brand sm:hidden"
@@ -103,7 +114,7 @@ export function DiscoverPage() {
         </section>
 
         <section className="border-y border-stone-200 bg-white">
-          <div className="mx-auto grid max-w-7xl gap-6 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_auto] lg:items-center lg:px-8">
+          <div className="mx-auto grid max-w-[1440px] gap-6 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_auto] lg:items-center lg:px-8">
             <div>
               <p className="mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-brand">
                 <LuMapPin aria-hidden="true" /> Around you
@@ -124,20 +135,18 @@ export function DiscoverPage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
-          <div className="mb-6 flex items-end justify-between gap-4">
+        <section className="mx-auto max-w-[1440px] px-4 py-10 sm:px-6 lg:px-8">
+          <div className="mb-5 flex items-end justify-between gap-4">
             <div>
               <p className="mb-2 text-xs font-medium uppercase tracking-[0.18em] text-brand">
                 More to explore
               </p>
-              <h2 className="text-3xl font-semibold tracking-tight">Make room for something new</h2>
+              <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                Make room for something new
+              </h2>
             </div>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {sampleEvents.slice(4).map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
-          </div>
+          <EventRail events={sampleEvents.slice(4)} />
         </section>
       </main>
     </SiteShell>
