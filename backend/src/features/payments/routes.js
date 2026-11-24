@@ -32,6 +32,7 @@ function auth(userModel, readAuth) {
 
 export function createPaymentRouter({
   service,
+  keyId,
   keySecret,
   userModel = User,
   readAuth,
@@ -95,6 +96,8 @@ export function createPaymentRouter({
       data: {
         id: payment._id,
         reservationId: payment.reservationId,
+        providerOrderId: payment.providerOrderId,
+        keyId,
         amount: payment.amount,
         currency: payment.currency,
         status: payment.status,

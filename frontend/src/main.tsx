@@ -1,9 +1,12 @@
-import { StrictMode } from 'react'
+import { StrictMode, useLayoutEffect, useRef } from 'react'
 import { ClerkProvider } from '@clerk/react'
+import { useAuth } from '@clerk/react'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, useNavigate } from 'react-router-dom'
 import { IconContext } from 'react-icons'
 import { AppRoutes } from './app/router'
+import { queryClient } from './app/queryClient'
 import { OnboardingGate } from './features/auth/AuthRoutes'
 import './index.css'
 
@@ -27,10 +30,25 @@ function ApplicationRoutes() {
       signInFallbackRedirectUrl="/auth/complete"
       signUpFallbackRedirectUrl="/auth/complete"
     >
-      <OnboardingGate>
-        <AppRoutes />
-      </OnboardingGate>
+      <QueryClientProvider client={queryClient}>
+        <SessionQueryBoundary />
+      </QueryClientProvider>
     </ClerkProvider>
+  )
+}
+
+function SessionQueryBoundary() {
+  const { isLoaded, userId } = useAuth()
+  const previousUser = useRef<string | null | undefined>(undefined)
+  useLayoutEffect(() => {
+    if (!isLoaded) return
+    if (previousUser.current !== undefined && previousUser.current !== userId) queryClient.clear()
+    previousUser.current = userId
+  }, [isLoaded, userId])
+  return (
+    <OnboardingGate>
+      <AppRoutes />
+    </OnboardingGate>
   )
 }
 

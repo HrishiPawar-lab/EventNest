@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import { verifyWebhook } from '@clerk/express/webhooks';
 import { User } from './models/User.js';
 import { ApiError } from './apiError.js';
@@ -30,6 +31,7 @@ import {
 } from './services/clerkUserSync.js';
 
 export function createApp({
+  frontendOrigin,
   webhookSigningSecret,
   clerkClient,
   userModel = User,
@@ -50,6 +52,13 @@ export function createApp({
 } = {}) {
   const app = express();
   app.disable('x-powered-by');
+  if (frontendOrigin)
+    app.use(
+      cors({
+        origin: frontendOrigin,
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+      }),
+    );
   const payments =
     paymentService ??
     createPaymentService(
@@ -145,6 +154,7 @@ export function createApp({
     '/api/payments',
     createPaymentRouter({
       service: payments,
+      keyId: razorpayConfig?.keyId,
       keySecret: razorpayConfig?.keySecret,
       userModel,
       readAuth,

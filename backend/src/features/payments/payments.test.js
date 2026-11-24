@@ -648,3 +648,44 @@ test('checkout verification returns 503 when the signing secret is unavailable',
   );
   assert.equal(response.status, 503);
 });
+
+test('payment lookup returns its existing order and public key for safe checkout resume', async (t) => {
+  const paymentId = new mongoose.Types.ObjectId();
+  const app = express();
+  app.use(
+    '/api/payments',
+    createPaymentRouter({
+      service: {
+        get: async () => ({
+          _id: paymentId,
+          reservationId,
+          providerOrderId: 'order_existing',
+          amount: 10000,
+          currency: 'INR',
+          status: 'created',
+        }),
+      },
+      keyId: 'rzp_test_public',
+      readAuth: () => ({ isAuthenticated: true, userId: 'clerk_1' }),
+      userModel: {
+        findOne: async () => ({
+          _id: userId,
+          roles: ['attendee'],
+          accountStatus: 'active',
+          verification: { emailVerified: true },
+        }),
+      },
+    }),
+  );
+  const server = app.listen(0);
+  await new Promise((resolve) => server.once('listening', resolve));
+  t.after(() => new Promise((resolve) => server.close(resolve)));
+  const response = await fetch(
+    `http://127.0.0.1:${server.address().port}/api/payments/${paymentId}`,
+  );
+  assert.equal(response.status, 200);
+  const { data } = await response.json();
+  assert.equal(data.providerOrderId, 'order_existing');
+  assert.equal(data.keyId, 'rzp_test_public');
+  assert.equal('keySecret' in data, false);
+});

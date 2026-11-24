@@ -25,7 +25,7 @@ export function WishlistButton({
   className?: string
 }) {
   const { isSignedIn } = useAuth()
-  const { ids, toggle } = useWishlist()
+  const { ids, toggle, isChanging } = useWishlist()
   const navigate = useNavigate()
   const location = useLocation()
   const saved = ids.includes(eventId)
@@ -36,7 +36,8 @@ export function WishlistButton({
       navigate(signInPathFor(location))
       return
     }
-    setSaveError(!toggle(eventId))
+    setSaveError(false)
+    void toggle(eventId).catch(() => setSaveError(true))
   }
 
   return (
@@ -46,6 +47,8 @@ export function WishlistButton({
           type="button"
           aria-label={saved ? 'Remove from wishlist' : 'Save to wishlist'}
           aria-pressed={saved}
+          aria-busy={isChanging}
+          disabled={isChanging}
           onClick={onClick}
           className="inline-flex size-9 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-700 transition-colors hover:border-brand hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
         >
@@ -59,7 +62,7 @@ export function WishlistButton({
             role="alert"
             className="absolute right-0 top-11 z-10 w-52 rounded-md border border-red-200 bg-white p-2 text-xs text-red-700"
           >
-            Could not save here. Check browser storage and try again.
+            Could not update your wishlist. Please try again.
           </span>
         )}
       </span>
@@ -76,8 +79,8 @@ const categoryIcons = {
   Workshops: LuWrench,
 } satisfies Record<EventCategory, typeof LuMusic2>
 
-export function CategoryIcon({ category }: { category: EventCategory }) {
-  const Icon = categoryIcons[category]
+export function CategoryIcon({ category }: { category: string }) {
+  const Icon = categoryIcons[category as EventCategory] ?? LuTicket
   return <Icon aria-hidden="true" className="size-4 shrink-0" />
 }
 
@@ -90,12 +93,18 @@ export function EventCard({ event }: { event: Event }) {
           aria-label={`View ${event.title}`}
           className="block size-full"
         >
-          <img
-            src={event.image}
-            alt=""
-            loading="lazy"
-            className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-          />
+          {event.image ? (
+            <img
+              src={event.image}
+              alt=""
+              loading="lazy"
+              className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            />
+          ) : (
+            <span className="flex size-full items-center justify-center bg-stone-200 text-stone-500">
+              <LuCalendarDays aria-hidden="true" className="size-10" />
+            </span>
+          )}
         </Link>
         <WishlistButton eventId={event.id} className="absolute right-3 top-3" />
         <span className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-md bg-white px-2.5 py-1 text-xs font-medium text-ink">

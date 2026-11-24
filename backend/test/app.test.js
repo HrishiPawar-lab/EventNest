@@ -25,6 +25,40 @@ test('health endpoint responds without exposing Express version', async () => {
   assert.deepEqual(await response.json(), { status: 'ok' });
 });
 
+test('configured frontend origin receives CORS preflight permission only for that origin', async () => {
+  const corsServer = createApp({
+    frontendOrigin: 'http://localhost:5173',
+  }).listen(0);
+  try {
+    await new Promise((resolve) => corsServer.once('listening', resolve));
+    const url = `http://127.0.0.1:${corsServer.address().port}/api/reservations`;
+    const preflight = await fetch(url, {
+      method: 'OPTIONS',
+      headers: {
+        Origin: 'http://localhost:5173',
+        'Access-Control-Request-Method': 'POST',
+        'Access-Control-Request-Headers': 'authorization,content-type',
+      },
+    });
+    assert.equal(preflight.status, 204);
+    assert.equal(
+      preflight.headers.get('access-control-allow-origin'),
+      'http://localhost:5173',
+    );
+    const foreign = await fetch(url, {
+      headers: { Origin: 'https://foreign.example' },
+    });
+    assert.notEqual(
+      foreign.headers.get('access-control-allow-origin'),
+      'https://foreign.example',
+    );
+  } finally {
+    await new Promise((resolve, reject) =>
+      corsServer.close((error) => (error ? reject(error) : resolve())),
+    );
+  }
+});
+
 test('unknown routes return a safe JSON error', async () => {
   const response = await fetch(`${baseUrl}/missing`);
   assert.equal(response.status, 404);

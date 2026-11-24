@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   LuArrowLeft,
   LuCalendarDays,
@@ -11,22 +11,47 @@ import {
 import { Link, useParams } from 'react-router-dom'
 import { SiteShell } from '../../components/layout/SiteShell'
 import { Button } from '../../components/ui/button'
-import { eventById, eventDate, formatPrice, sampleEvents } from './catalog'
+import { eventDate, formatPrice, sampleEvents } from './catalog'
+import { useEvent, useEvents } from './api'
 import { EventCard, WishlistButton } from './EventCard'
 
 export function EventDetailsPage() {
   const { eventId } = useParams()
-  const event = eventById(eventId)
+  const eventQuery = useEvent(eventId)
+  const recommendations = useEvents()
+  const event = eventQuery.data
   const [quantity, setQuantity] = useState(1)
+  useEffect(() => setQuantity(1), [eventId])
 
-  if (!event)
+  if (eventQuery.isPending)
+    return (
+      <SiteShell>
+        <main role="status" className="mx-auto max-w-4xl px-4 py-24">
+          Loading event details...
+        </main>
+      </SiteShell>
+    )
+
+  if (eventQuery.isError || !event)
     return (
       <SiteShell>
         <main className="mx-auto max-w-4xl px-4 py-24 text-center">
-          <h1 className="text-3xl font-semibold">Event not found</h1>
+          <h1 className="text-3xl font-semibold">
+            {eventQuery.error && 'status' in eventQuery.error && eventQuery.error.status === 404
+              ? 'Event not found'
+              : 'Event unavailable'}
+          </h1>
           <p className="mt-3 text-stone-600">
-            The event may have moved or the link may be incorrect.
+            {eventQuery.error?.message ?? 'The event may have moved or the link may be incorrect.'}
           </p>
+          <Button
+            type="button"
+            variant="outline"
+            className="mt-6 mr-3"
+            onClick={() => eventQuery.refetch()}
+          >
+            Try again
+          </Button>
           <Button asChild className="mt-6">
             <Link to="/explore">Explore events</Link>
           </Button>
@@ -53,29 +78,42 @@ export function EventDetailsPage() {
             </span>
           </div>
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{event.title}</h1>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-stone-600 sm:text-base">
-            {event.description}
-          </p>
+          {event.description && (
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-stone-600 sm:text-base">
+              {event.description}
+            </p>
+          )}
         </div>
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(320px,0.8fr)]">
           <div>
-            <img
-              src={event.image}
-              alt={`Scene from a ${event.category.toLowerCase()} event`}
-              className="aspect-[1.8] w-full rounded-xl object-cover"
-            />
+            {event.image ? (
+              <img
+                src={event.image}
+                alt=""
+                className="aspect-[1.8] w-full rounded-xl object-cover"
+              />
+            ) : (
+              <div className="flex aspect-[1.8] items-center justify-center rounded-xl bg-stone-200 text-stone-500">
+                <LuTicket aria-hidden="true" className="size-12" />
+              </div>
+            )}
             <div className="mt-6 grid gap-6 border-b border-stone-200 pb-6 sm:grid-cols-2">
-              <section>
-                <h2 className="text-lg font-semibold">What to expect</h2>
-                <ul className="mt-4 space-y-3">
-                  {event.highlights.map((highlight) => (
-                    <li key={highlight} className="flex items-center gap-3 text-sm text-stone-600">
-                      <LuShieldCheck aria-hidden="true" className="shrink-0 text-brand" />{' '}
-                      {highlight}
-                    </li>
-                  ))}
-                </ul>
-              </section>
+              {event.highlights.length > 0 && (
+                <section>
+                  <h2 className="text-lg font-semibold">What to expect</h2>
+                  <ul className="mt-4 space-y-3">
+                    {event.highlights.map((highlight) => (
+                      <li
+                        key={highlight}
+                        className="flex items-center gap-3 text-sm text-stone-600"
+                      >
+                        <LuShieldCheck aria-hidden="true" className="shrink-0 text-brand" />{' '}
+                        {highlight}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
               <section>
                 <h2 className="text-lg font-semibold">The venue</h2>
                 <p className="mt-4 text-sm font-medium">{event.venue}</p>
@@ -87,15 +125,12 @@ export function EventDetailsPage() {
             </div>
             <section className="py-6">
               <h2 className="text-lg font-semibold">Hosted by</h2>
-              <Link
-                to={`/organizers/${encodeURIComponent(event.organizer.toLowerCase().replaceAll(' ', '-'))}`}
-                className="mt-4 inline-flex items-center gap-3 rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm font-medium hover:border-brand"
-              >
+              <span className="mt-4 inline-flex items-center gap-3 rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm font-medium">
                 <span className="flex size-9 items-center justify-center rounded-full bg-ink text-white">
                   {event.organizer[0]}
                 </span>
                 {event.organizer}
-              </Link>
+              </span>
             </section>
           </div>
           <aside className="h-fit rounded-xl border border-stone-200 bg-white p-5 lg:sticky lg:top-20">
@@ -105,7 +140,7 @@ export function EventDetailsPage() {
                   General admission
                 </p>
                 <p className="mt-2 text-2xl font-semibold">{formatPrice(event.price)}</p>
-                <p className="text-sm text-stone-500">per ticket · example price</p>
+                <p className="text-sm text-stone-500">per ticket</p>
               </div>
               <WishlistButton eventId={event.id} />
             </div>
@@ -161,14 +196,14 @@ export function EventDetailsPage() {
               </Link>
             </Button>
             <p className="mt-3 text-center text-xs leading-5 text-stone-500">
-              Demo listing. No reservation or payment is made on this screen.
+              Availability is confirmed when you reserve.
             </p>
           </aside>
         </div>
         <section className="mt-12">
           <h2 className="text-2xl font-semibold">You might also like</h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {sampleEvents
+            {(recommendations.data?.data ?? [])
               .filter((item) => item.id !== event.id)
               .slice(0, 4)
               .map((item) => (

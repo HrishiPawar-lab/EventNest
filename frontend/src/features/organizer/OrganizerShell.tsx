@@ -20,7 +20,13 @@ const navigation = [
   { to: '/organizer/preview/analytics', label: 'Analytics', icon: LuChartBar },
 ]
 
-export function OrganizerShell({ children }: { children: ReactNode }) {
+export function OrganizerShell({
+  children,
+  preview = true,
+}: {
+  children: ReactNode
+  preview?: boolean
+}) {
   return (
     <div className="min-h-screen bg-paper text-ink lg:flex">
       <aside className="bg-ink text-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-56 lg:shrink-0 lg:flex-col">
@@ -57,9 +63,11 @@ export function OrganizerShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
       <div className="min-w-0 flex-1">
-        <div className="border-b border-orange-100 bg-orange-50 px-5 py-1.5 text-[11px] font-normal text-stone-600">
-          Organizer workspace preview · sample data only · no changes are saved
-        </div>
+        {preview && (
+          <div className="border-b border-orange-100 bg-orange-50 px-5 py-1.5 text-[11px] font-normal text-stone-600">
+            Organizer workspace preview · sample data only · no changes are saved
+          </div>
+        )}
         {children}
       </div>
     </div>

@@ -1,12 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { LuSearch, LuSlidersHorizontal, LuX } from 'react-icons/lu'
 import { useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 import { SiteShell } from '../../components/layout/SiteShell'
 import { Button } from '../../components/ui/button'
-import { categories, sampleEvents } from './catalog'
+import { categories } from './catalog'
+import { useEvents } from './api'
 import { EventCard } from './EventCard'
 
 const searchSchema = z.object({ query: z.string().trim().max(100) })
@@ -18,36 +19,32 @@ export function ExplorePage({ searchResults = false }: { searchResults?: boolean
   const query = params.get('q')?.trim() || ''
   const category = params.get('category') || ''
   const city = params.get('city') || ''
-  const requestedPrice = Number(params.get('maxPrice') || '5000')
-  const maxPrice = Number.isFinite(requestedPrice)
-    ? Math.min(5000, Math.max(0, requestedPrice))
-    : 5000
-  const sort = params.get('sort') || 'date'
-  const { register, handleSubmit } = useForm<SearchValues>({
+  const maxPrice = params.get('maxPrice') || ''
+  const sort = params.get('sort') === 'price' ? 'price' : 'date'
+  const requestedPage = Number(params.get('page') || '1')
+  const page = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1
+  const events = useEvents({
+    page,
+    q: query || undefined,
+    category: category || undefined,
+    city: city || undefined,
+    maxPrice: maxPrice ? Number(maxPrice) : undefined,
+    sort,
+  })
+  const visible = events.data?.data ?? []
+  const { register, handleSubmit, reset } = useForm<SearchValues>({
     resolver: zodResolver(searchSchema),
     defaultValues: { query },
   })
+  useEffect(() => reset({ query }), [query, reset])
 
   function update(name: string, value: string) {
     const next = new URLSearchParams(params)
     if (value) next.set(name, value)
     else next.delete(name)
+    if (name !== 'page') next.delete('page')
     setParams(next)
   }
-
-  const visible = sampleEvents
-    .filter(
-      (event) =>
-        !query ||
-        `${event.title} ${event.category} ${event.city} ${event.venue}`
-          .toLowerCase()
-          .includes(query.toLowerCase()),
-    )
-    .filter((event) => !category || event.category === category)
-    .filter((event) => !city || event.city === city)
-    .filter((event) => event.price <= maxPrice)
-    .sort((a, b) => (sort === 'price' ? a.price - b.price : a.date.localeCompare(b.date)))
-  const cities = [...new Set(sampleEvents.map((event) => event.city))]
 
   return (
     <SiteShell>
@@ -72,7 +69,7 @@ export function ExplorePage({ searchResults = false }: { searchResults?: boolean
           <input
             {...register('query')}
             aria-label="Search events"
-            placeholder="Search by event, venue or city"
+            placeholder="Search event name or description"
             maxLength={100}
             className="min-w-0 flex-1 px-2 py-2 text-[15px] outline-none"
           />
@@ -161,43 +158,45 @@ export function ExplorePage({ searchResults = false }: { searchResults?: boolean
               <label htmlFor="city-filter" className="text-[15px] font-medium">
                 Location
               </label>
-              <select
+              <input
                 id="city-filter"
-                value={city}
-                onChange={(event) => update('city', event.target.value)}
+                key={city}
+                defaultValue={city}
+                placeholder="Any city"
+                maxLength={100}
+                onBlur={(event) => {
+                  if (event.target.value.trim() !== city) update('city', event.target.value.trim())
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') event.currentTarget.blur()
+                }}
                 className="mt-3 h-10 w-full rounded-lg border border-stone-300 bg-white px-3 text-sm"
-              >
-                <option value="">All cities</option>
-                {cities.map((item) => (
-                  <option key={item}>{item}</option>
-                ))}
-              </select>
+              />
             </div>
             <div className="mt-6 border-t border-stone-100 pt-5">
               <label htmlFor="price-filter" className="text-[15px] font-medium">
                 Maximum price
               </label>
-              <input
+              <select
                 id="price-filter"
-                type="range"
-                min="0"
-                max="5000"
-                step="100"
                 value={maxPrice}
                 onChange={(event) => update('maxPrice', event.target.value)}
-                className="mt-4 w-full accent-brand"
-              />
-              <p className="mt-1 flex justify-between text-xs text-stone-500">
-                <span>₹0</span>
-                <span>₹{maxPrice.toLocaleString('en-IN')}</span>
-              </p>
+                className="mt-3 h-10 w-full rounded-lg border border-stone-300 bg-white px-3 text-sm"
+              >
+                <option value="">Any price</option>
+                <option value="500">Up to ₹500</option>
+                <option value="1000">Up to ₹1,000</option>
+                <option value="2000">Up to ₹2,000</option>
+                <option value="5000">Up to ₹5,000</option>
+                <option value="10000">Up to ₹10,000</option>
+              </select>
             </div>
           </aside>
           <div>
             <div className="mb-4 flex items-center justify-between gap-2">
               <p className="min-w-0 truncate text-sm text-stone-600">
-                <span className="font-semibold text-ink">{visible.length}</span>{' '}
-                {visible.length === 1 ? 'sample event' : 'sample events'} found{' '}
+                <span className="font-semibold text-ink">{events.data?.pagination.total ?? 0}</span>{' '}
+                {events.data?.pagination.total === 1 ? 'event' : 'events'} found{' '}
                 {query && (
                   <>
                     for <span className="font-semibold">“{query}”</span>
@@ -216,13 +215,31 @@ export function ExplorePage({ searchResults = false }: { searchResults?: boolean
                 </select>
               </label>
             </div>
-            {visible.length ? (
+            {events.isPending && (
+              <p role="status" className="py-12 text-stone-600">
+                Loading events...
+              </p>
+            )}
+            {events.isError && (
+              <div role="alert" className="rounded-xl border border-red-200 bg-white p-6">
+                <p>Events could not be loaded. {events.error.message}</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="mt-4"
+                  onClick={() => events.refetch()}
+                >
+                  Try again
+                </Button>
+              </div>
+            )}
+            {events.isSuccess && visible.length ? (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {visible.map((event) => (
                   <EventCard key={event.id} event={event} />
                 ))}
               </div>
-            ) : (
+            ) : events.isSuccess ? (
               <div
                 role="status"
                 className="rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 text-center"
@@ -241,11 +258,31 @@ export function ExplorePage({ searchResults = false }: { searchResults?: boolean
                   Clear filters <LuX aria-hidden="true" />
                 </Button>
               </div>
+            ) : null}
+            {events.isSuccess && events.data.pagination.total > events.data.pagination.limit && (
+              <div className="mt-6 flex items-center justify-between gap-4 text-sm">
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={page <= 1}
+                  onClick={() => update('page', String(page - 1))}
+                >
+                  Previous
+                </Button>
+                <span>
+                  Page {page} of{' '}
+                  {Math.ceil(events.data.pagination.total / events.data.pagination.limit)}
+                </span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={page * events.data.pagination.limit >= events.data.pagination.total}
+                  onClick={() => update('page', String(page + 1))}
+                >
+                  Next
+                </Button>
+              </div>
             )}
-            <p className="mt-8 text-xs text-stone-500">
-              These listings demonstrate the EventNest experience. Live event inventory is not
-              connected yet.
-            </p>
           </div>
         </div>
       </main>

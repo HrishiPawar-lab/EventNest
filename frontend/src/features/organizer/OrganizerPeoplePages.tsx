@@ -1,6 +1,4 @@
-import { LuArrowRight, LuScanLine, LuSearch, LuShieldAlert, LuUsers } from 'react-icons/lu'
-import { Link } from 'react-router-dom'
-import { Button } from '../../components/ui/button'
+import { LuSearch, LuUsers } from 'react-icons/lu'
 import { OrganizerHeading, OrganizerShell } from './OrganizerShell'
 
 const sampleGuests = [
@@ -74,57 +72,6 @@ export function AttendeeManagementPage() {
             Attendee lists must come from verified tickets. No one can be added, removed or checked
             in from this preview.
           </p>
-        </div>
-      </main>
-    </OrganizerShell>
-  )
-}
-
-export function CheckInPage() {
-  return (
-    <OrganizerShell>
-      <main className="mx-auto max-w-5xl px-4 py-7 sm:px-6 lg:px-8">
-        <OrganizerHeading
-          eyebrow="At the door"
-          title="QR check-in"
-          description="Welcome guests with a fast, secure entry flow."
-        />
-        <div className="grid gap-6 md:grid-cols-[1fr_0.8fr]">
-          <section className="rounded-xl border border-stone-200 bg-white p-6">
-            <h2 className="text-xl font-semibold">Scan a ticket</h2>
-            <p className="mt-2 text-sm text-stone-600">
-              The camera scanner will verify credentials against the backend and mark each valid
-              ticket used exactly once.
-            </p>
-            <div className="mt-6 flex aspect-square max-h-88 items-center justify-center rounded-lg border border-dashed border-stone-300 bg-paper">
-              <div className="text-center">
-                <LuScanLine aria-hidden="true" className="mx-auto size-14 text-stone-400" />
-                <p className="mt-3 text-sm font-medium">Camera preview unavailable</p>
-              </div>
-            </div>
-            <Button disabled className="mt-6 w-full">
-              Start scanner
-            </Button>
-          </section>
-          <section className="rounded-xl border border-orange-200 bg-orange-50 p-6">
-            <LuShieldAlert aria-hidden="true" className="size-7 text-brand" />
-            <h2 className="mt-4 text-xl font-semibold">Every check-in is verified</h2>
-            <p className="mt-3 text-sm leading-6 text-stone-700">
-              Scanning a code on a device is not enough to grant entry. A live check-in needs the
-              backend to validate an opaque QR credential and atomically update ticket status.
-            </p>
-            <div className="mt-6 border-t border-orange-200 pt-5">
-              <p className="text-sm font-medium">
-                No valid ticket credentials exist in this preview.
-              </p>
-              <Link
-                to="/organizer/preview/attendees"
-                className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-brand"
-              >
-                View attendee preview <LuArrowRight aria-hidden="true" />
-              </Link>
-            </div>
-          </section>
         </div>
       </main>
     </OrganizerShell>

@@ -24,6 +24,7 @@ export async function startServer(
         ? createClerkClient({ secretKey: config.clerk.secretKey })
         : undefined;
       const server = createApp({
+        frontendOrigin: config.frontendOrigin,
         webhookSigningSecret: config.clerk?.webhookSigningSecret,
         clerkClient,
         clerkSessionMiddleware: config.clerk?.publishableKey

@@ -22,6 +22,7 @@ test('loads a valid MongoDB URI and default port', () => {
     {
       port: 4000,
       mongodbUri: 'mongodb://localhost:27017/eventnest',
+      frontendOrigin: undefined,
       clerk: {
         publishableKey: 'pk_test_placeholder',
         secretKey: 'sk_test_placeholder',
@@ -31,6 +32,32 @@ test('loads a valid MongoDB URI and default port', () => {
       razorpay: null,
     },
   );
+});
+
+test('accepts only one configured frontend origin', () => {
+  assert.equal(
+    loadConfig({
+      MONGODB_URI: 'mongodb://localhost/eventnest',
+      FRONTEND_ORIGIN: 'http://localhost:5173',
+      ...clerkEnv,
+    }).frontendOrigin,
+    'http://localhost:5173',
+  );
+  for (const origin of [
+    'https://example.com/path',
+    'https://example.com,https://other.com',
+    'file:///tmp',
+  ]) {
+    assert.throws(
+      () =>
+        loadConfig({
+          MONGODB_URI: 'mongodb://localhost/test',
+          FRONTEND_ORIGIN: origin,
+          ...clerkEnv,
+        }),
+      /FRONTEND_ORIGIN must be a single HTTP\(S\) origin/,
+    );
+  }
 });
 
 test('Cloudinary config is optional until credentials are supplied', () => {

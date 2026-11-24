@@ -1,3 +1,4 @@
+import { URL } from 'node:url';
 import { loadClerkConfig } from './config/clerk.js';
 import { loadCloudinaryConfig } from './config/cloudinary.js';
 import { loadRazorpayConfig } from './config/razorpay.js';
@@ -13,9 +14,25 @@ export function loadConfig(env = process.env) {
     throw new Error('MONGODB_URI is required');
   }
 
+  let frontendOrigin;
+  if (env.FRONTEND_ORIGIN?.trim()) {
+    try {
+      const url = new URL(env.FRONTEND_ORIGIN.trim());
+      if (
+        !['http:', 'https:'].includes(url.protocol) ||
+        url.href !== `${url.origin}/`
+      )
+        throw new Error('Invalid origin');
+      frontendOrigin = url.origin;
+    } catch {
+      throw new Error('FRONTEND_ORIGIN must be a single HTTP(S) origin');
+    }
+  }
+
   return {
     port,
     mongodbUri: env.MONGODB_URI.trim(),
+    frontendOrigin,
     clerk: loadClerkConfig(env),
     cloudinary: loadCloudinaryConfig(env),
     razorpay: loadRazorpayConfig(env),

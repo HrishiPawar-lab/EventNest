@@ -1,10 +1,12 @@
 import { cleanup, render, screen } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import { AppRoutes } from './router'
+import { eventId, installTestApi, paymentId, ticketId } from './testApi'
 
 vi.mock('@clerk/react', () => ({
-  useAuth: () => ({ isLoaded: true, isSignedIn: true }),
+  useAuth: () => ({ isLoaded: true, isSignedIn: true, getToken: async () => 'test-token' }),
   useUser: () => ({
     isLoaded: true,
     user: {
@@ -21,19 +23,24 @@ vi.mock('@clerk/react', () => ({
   useClerk: () => ({ signOut: vi.fn() }),
 }))
 
-afterEach(cleanup)
+beforeEach(() => vi.stubGlobal('fetch', installTestApi()))
+afterEach(() => {
+  cleanup()
+  vi.unstubAllGlobals()
+  vi.unstubAllEnvs()
+})
 
 describe('screen routes', () => {
   it.each([
     ['/', 'Discover unforgettable events.'],
     ['/explore', 'Explore events'],
     ['/search?q=music', 'Search results'],
-    ['/events/afterglow-live', 'Afterglow Live'],
-    ['/booking/review/afterglow-live?quantity=2', 'Review your tickets'],
-    ['/checkout/afterglow-live?quantity=2', 'Checkout'],
-    ['/booking/confirmation/afterglow-live', 'A great night is one step away'],
+    [`/events/${eventId}`, 'Afterglow Live'],
+    [`/booking/review/${eventId}?quantity=2`, 'Review your tickets'],
+    [`/checkout/${eventId}?quantity=2`, 'Checkout'],
+    [`/booking/confirmation/${eventId}?paymentId=${paymentId}`, 'Your tickets are confirmed'],
     ['/tickets', 'My tickets'],
-    ['/tickets/example', 'Afterglow Live'],
+    [`/tickets/${ticketId}`, 'Afterglow Live'],
     ['/wishlist', 'Your wishlist'],
     ['/profile', 'Welcome, Ada'],
     ['/settings', 'Account settings'],
@@ -52,9 +59,13 @@ describe('screen routes', () => {
     ['/organizers/good-nights-collective', 'Good Nights Collective'],
   ])('renders %s', async (path, heading) => {
     render(
-      <MemoryRouter initialEntries={[path]}>
-        <AppRoutes />
-      </MemoryRouter>,
+      <QueryClientProvider
+        client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+      >
+        <MemoryRouter initialEntries={[path]}>
+          <AppRoutes />
+        </MemoryRouter>
+      </QueryClientProvider>,
     )
     expect(
       await screen.findByRole('heading', { level: 1, name: heading }, { timeout: 5000 }),

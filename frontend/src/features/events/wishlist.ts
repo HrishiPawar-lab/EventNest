@@ -1,56 +1,40 @@
-import { useUser } from '@clerk/react'
-import { useSyncExternalStore } from 'react'
+import { useAuth } from '@clerk/react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { usePrivateApi, usePrivateApiPage } from '../../lib/api'
+import type { PublicEvent } from './api'
 
-const keyPrefix = 'eventnest.preview.wishlist.'
-const eventName = 'eventnest:wishlist-change'
-const empty: string[] = []
-const snapshots = new Map<string, string[]>()
-
-function read(key: string) {
-  try {
-    const value = JSON.parse(localStorage.getItem(key) || '[]') as unknown
-    return Array.isArray(value)
-      ? value.filter((item): item is string => typeof item === 'string')
-      : []
-  } catch {
-    return []
-  }
+export type WishlistEntry = {
+  _id: string
+  eventId: (PublicEvent & { status?: string }) | null
 }
 
-function getSnapshot(key: string) {
-  const next = read(key)
-  const current = snapshots.get(key)
-  if (!current || next.join('|') !== current.join('|')) snapshots.set(key, next)
-  return snapshots.get(key) || empty
-}
-
-function subscribe(callback: () => void) {
-  window.addEventListener(eventName, callback)
-  window.addEventListener('storage', callback)
-  return () => {
-    window.removeEventListener(eventName, callback)
-    window.removeEventListener('storage', callback)
-  }
-}
+export const wishlistKeys = { all: ['wishlist'] as const }
 
 export function useWishlist() {
-  const { user } = useUser()
-  const key = user ? `${keyPrefix}${user.id}` : ''
-  const ids = useSyncExternalStore(
-    subscribe,
-    () => (key ? getSnapshot(key) : empty),
-    () => empty,
-  )
-  function toggle(id: string) {
-    if (!key) return false
-    const next = ids.includes(id) ? ids.filter((entry) => entry !== id) : [...ids, id]
-    try {
-      localStorage.setItem(key, JSON.stringify(next))
-      window.dispatchEvent(new Event(eventName))
-      return true
-    } catch {
-      return false
-    }
+  const { isSignedIn } = useAuth()
+  const api = usePrivateApi()
+  const apiPage = usePrivateApiPage()
+  const cache = useQueryClient()
+  const list = useQuery({
+    queryKey: wishlistKeys.all,
+    queryFn: ({ signal }) => apiPage<WishlistEntry>('/api/wishlist?limit=100', signal),
+    enabled: Boolean(isSignedIn),
+    staleTime: 15_000,
+  })
+  const ids = (list.data?.data ?? [])
+    .map((item) => item.eventId?._id)
+    .filter((id): id is string => Boolean(id))
+  const change = useMutation({
+    mutationFn: async ({ id, saved }: { id: string; saved: boolean }) => {
+      if (saved) await api<void>(`/api/wishlist/${id}`, { method: 'DELETE' })
+      else await api<{ saved: true }>(`/api/wishlist/${id}`, { method: 'PUT' })
+    },
+    onSuccess: () => cache.invalidateQueries({ queryKey: wishlistKeys.all }),
+  })
+  return {
+    ...list,
+    ids,
+    toggle: (id: string) => change.mutateAsync({ id, saved: ids.includes(id) }),
+    isChanging: change.isPending,
   }
-  return { ids, toggle }
 }

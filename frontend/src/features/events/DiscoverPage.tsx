@@ -5,7 +5,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 import { SiteShell } from '../../components/layout/SiteShell'
 import { Button } from '../../components/ui/button'
-import { categories, sampleEvents, type Event } from './catalog'
+import { categories, type Event } from './catalog'
+import { useEvents } from './api'
 import { CategoryIcon, EventCard } from './EventCard'
 
 const searchSchema = z.object({ query: z.string().trim().max(100) })
@@ -27,6 +28,9 @@ function EventRail({ events }: { events: Event[] }) {
 }
 
 export function DiscoverPage() {
+  const events = useEvents()
+  const highlights = events.data?.data.slice(0, 4) ?? []
+  const more = events.data?.data.slice(4, 8) ?? []
   const navigate = useNavigate()
   const { register, handleSubmit } = useForm<SearchValues>({
     resolver: zodResolver(searchSchema),
@@ -104,7 +108,30 @@ export function DiscoverPage() {
               Explore all <LuArrowRight aria-hidden="true" />
             </Link>
           </div>
-          <EventRail events={sampleEvents.slice(0, 4)} />
+          {events.isPending && (
+            <p role="status" className="py-12 text-stone-600">
+              Loading events...
+            </p>
+          )}
+          {events.isError && (
+            <div role="alert" className="rounded-xl border border-red-200 bg-white p-6">
+              <p>Events could not be loaded. {events.error.message}</p>
+              <Button
+                type="button"
+                variant="outline"
+                className="mt-4"
+                onClick={() => events.refetch()}
+              >
+                Try again
+              </Button>
+            </div>
+          )}
+          {events.isSuccess && !highlights.length && (
+            <p role="status" className="py-12 text-stone-600">
+              No upcoming events yet. Check back soon.
+            </p>
+          )}
+          {highlights.length > 0 && <EventRail events={highlights} />}
           <Link
             to="/explore"
             className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-brand sm:hidden"
@@ -135,19 +162,21 @@ export function DiscoverPage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-[1440px] px-4 py-10 sm:px-6 lg:px-8">
-          <div className="mb-5 flex items-end justify-between gap-4">
-            <div>
-              <p className="mb-2 text-xs font-medium uppercase tracking-[0.18em] text-brand">
-                More to explore
-              </p>
-              <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-                Make room for something new
-              </h2>
+        {more.length > 0 && (
+          <section className="mx-auto max-w-[1440px] px-4 py-10 sm:px-6 lg:px-8">
+            <div className="mb-5 flex items-end justify-between gap-4">
+              <div>
+                <p className="mb-2 text-xs font-medium uppercase tracking-[0.18em] text-brand">
+                  More to explore
+                </p>
+                <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                  Make room for something new
+                </h2>
+              </div>
             </div>
-          </div>
-          <EventRail events={sampleEvents.slice(4)} />
-        </section>
+            <EventRail events={more} />
+          </section>
+        )}
       </main>
     </SiteShell>
   )

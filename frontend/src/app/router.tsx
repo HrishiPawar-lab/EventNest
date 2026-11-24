@@ -20,15 +20,15 @@ const PublicOrganizerPage = lazy(() =>
   })),
 )
 const BookingReviewPage = lazy(() =>
-  import('../features/booking/BookingPages').then((module) => ({
+  import('../features/booking/BookingReviewPage').then((module) => ({
     default: module.BookingReviewPage,
   })),
 )
 const CheckoutPage = lazy(() =>
-  import('../features/booking/BookingPages').then((module) => ({ default: module.CheckoutPage })),
+  import('../features/booking/CheckoutPage').then((module) => ({ default: module.CheckoutPage })),
 )
 const BookingConfirmationPage = lazy(() =>
-  import('../features/booking/BookingPages').then((module) => ({
+  import('../features/booking/BookingConfirmationPage').then((module) => ({
     default: module.BookingConfirmationPage,
   })),
 )
@@ -110,7 +110,7 @@ const AttendeeManagementPage = lazy(() =>
   })),
 )
 const CheckInPage = lazy(() =>
-  import('../features/organizer/OrganizerPeoplePages').then((module) => ({
+  import('../features/organizer/CheckInPage').then((module) => ({
     default: module.CheckInPage,
   })),
 )

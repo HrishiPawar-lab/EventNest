@@ -8,7 +8,21 @@ import { Venue } from '../../models/Venue.js';
 import { isWholePaisePrice } from './validation.js';
 
 const publicFields =
-  'name description category venueId startDate endDate ticketPrice location imageUrl';
+  'name description category venueId organizerId startDate endDate ticketPrice location imageUrl';
+const publicRelations = [
+  { path: 'venueId', select: 'name' },
+  { path: 'organizerId', select: 'name' },
+];
+
+function publicEvent(event) {
+  const { venueId, organizerId, ...fields } = event;
+  return {
+    ...fields,
+    venueId: venueId?._id ?? venueId,
+    venueName: venueId?.name ?? null,
+    organizerName: organizerId?.name ?? null,
+  };
+}
 
 function assertEventId(id) {
   if (!mongoose.isObjectIdOrHexString(id))
@@ -100,21 +114,32 @@ export function createEventService({
       const [items, total] = await Promise.all([
         eventModel
           .find(filter, publicFields)
-          .sort({ startDate: 1, _id: 1 })
+          .sort(
+            query.sort === 'price'
+              ? { ticketPrice: 1, startDate: 1, _id: 1 }
+              : { startDate: 1, _id: 1 },
+          )
           .skip((query.page - 1) * query.limit)
           .limit(query.limit)
+          .populate(publicRelations)
           .lean(),
         eventModel.countDocuments(filter),
       ]);
-      return { items, total, page: query.page, limit: query.limit };
+      return {
+        items: items.map(publicEvent),
+        total,
+        page: query.page,
+        limit: query.limit,
+      };
     },
     async getPublic(id) {
       assertEventId(id);
       const event = await eventModel
         .findOne({ _id: id, status: 'published' }, publicFields)
+        .populate(publicRelations)
         .lean();
       if (!event) throw new ApiError(404, 'NOT_FOUND', 'Event not found');
-      return event;
+      return publicEvent(event);
     },
     async create(organizerId, input) {
       return connection.transaction(async (session) => {

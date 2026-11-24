@@ -238,6 +238,7 @@ test('query validation rejects unsupported filters and malformed pagination', as
     '/api/events?from=2027-02-31T12:00:00Z',
     '/api/events?minPrice=-1',
     '/api/events?minPrice=10&maxPrice=5',
+    '/api/events?sort=recent',
     '/api/organizer/events?foo=bar',
     '/api/organizer/events?status=unknown',
   ]) {
@@ -522,13 +523,18 @@ test('public service reads only published upcoming events with escaped search an
     find(filter, projection) {
       calls.push(['find', filter, projection]);
       return {
-        sort() {
+        sort(order) {
+          calls.push(['sort', order]);
           return this;
         },
         skip() {
           return this;
         },
         limit() {
+          return this;
+        },
+        populate(relations) {
+          calls.push(['populate', relations]);
           return this;
         },
         async lean() {
@@ -543,6 +549,10 @@ test('public service reads only published upcoming events with escaped search an
     findOne(filter, projection) {
       calls.push(['findOne', filter, projection]);
       return {
+        populate(relations) {
+          calls.push(['populate', relations]);
+          return this;
+        },
         async lean() {
           return { _id: eventId, status: 'published' };
         },
@@ -564,9 +574,28 @@ test('public service reads only published upcoming events with escaped search an
   assert.equal(calls[0][1].$or[0].name.test('Rock.*'), true);
   assert.equal(calls[0][1].ticketPrice.$gte, 0);
   assert.equal(calls[0][2].includes('imagePublicId'), false);
+  assert.equal(calls[0][2].includes('organizerId'), true);
+  assert.deepEqual(calls.find(([name]) => name === 'sort')[1], {
+    startDate: 1,
+    _id: 1,
+  });
+  assert.deepEqual(calls.find(([name]) => name === 'populate')[1], [
+    { path: 'venueId', select: 'name' },
+    { path: 'organizerId', select: 'name' },
+  ]);
   assert.equal((await service.getPublic(eventId)).status, 'published');
-  assert.deepEqual(calls.at(-1)[1], { _id: eventId, status: 'published' });
+  assert.deepEqual(calls.findLast(([name]) => name === 'findOne')[1], {
+    _id: eventId,
+    status: 'published',
+  });
   await assert.rejects(() => service.getPublic('bad-id'), { status: 400 });
+  calls.length = 0;
+  await service.listPublic({ page: 1, limit: 20, sort: 'price' });
+  assert.deepEqual(calls.find(([name]) => name === 'sort')[1], {
+    ticketPrice: 1,
+    startDate: 1,
+    _id: 1,
+  });
 });
 
 test('organizer listing always scopes queries to the authenticated local owner', async () => {

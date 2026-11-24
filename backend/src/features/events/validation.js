@@ -21,6 +21,7 @@ const publicQueryFields = new Set([
   'to',
   'minPrice',
   'maxPrice',
+  'sort',
 ]);
 const organizerQueryFields = new Set(['page', 'limit', 'status']);
 const statuses = new Set(['draft', 'published', 'cancelled', 'completed']);
@@ -137,6 +138,10 @@ export function parsePublicEventQuery(query) {
     page: integer(query.page, 1, 1000000, 'page'),
     limit: integer(query.limit, 20, 100, 'limit'),
   };
+  if (query.sort !== undefined) {
+    if (!['date', 'price'].includes(query.sort)) invalid('Invalid sort order');
+    output.sort = query.sort;
+  }
   for (const field of ['q', 'city', 'category']) {
     if (query[field] !== undefined)
       output[field] = text(query[field], field, { required: true, max: 100 });

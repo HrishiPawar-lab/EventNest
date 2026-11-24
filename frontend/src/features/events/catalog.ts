@@ -3,13 +3,13 @@ export type EventCategory = 'Music' | 'Food' | 'Arts' | 'Sports' | 'Technology' 
 export type Event = {
   id: string
   title: string
-  category: EventCategory
+  category: string
   city: string
   venue: string
   date: string
   time: string
   price: number
-  image: string
+  image?: string
   organizer: string
   description: string
   highlights: string[]
@@ -150,6 +150,9 @@ export const categories: EventCategory[] = [
 export const formatPrice = (price: number) => `₹${price.toLocaleString('en-IN')}`
 export const eventById = (id: string | undefined) => sampleEvents.find((event) => event.id === id)
 export const eventDate = (date: string) =>
-  new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }).format(
-    new Date(`${date}T12:00:00`),
-  )
+  new Intl.DateTimeFormat('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'Asia/Kolkata',
+  }).format(new Date(date.includes('T') ? date : `${date}T12:00:00+05:30`))
