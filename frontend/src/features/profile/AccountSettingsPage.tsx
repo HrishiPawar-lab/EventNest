@@ -50,12 +50,14 @@ export function AccountSettingsPage() {
         >
           <LuArrowLeft aria-hidden="true" /> Back to profile
         </Link>
-        <p className="mt-7 text-xs font-bold uppercase tracking-[0.2em] text-brand">Your account</p>
-        <h1 className="mt-2 text-4xl font-black">Account settings</h1>
+        <p className="mt-7 text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+          Your account
+        </p>
+        <h1 className="mt-2 text-4xl font-bold">Account settings</h1>
         <p className="mt-3 text-stone-600">Keep your profile and contact details up to date.</p>
         <div className="mt-8 space-y-6">
           <section className="rounded-xl border border-stone-200 bg-white p-6">
-            <h2 className="text-xl font-bold">Personal details</h2>
+            <h2 className="text-xl font-semibold">Personal details</h2>
             <p className="mt-1 text-sm text-stone-500">
               The name people see on your EventNest profile.
             </p>
@@ -108,7 +110,7 @@ export function AccountSettingsPage() {
             )}
           </section>
           <section className="rounded-xl border border-stone-200 bg-white p-6">
-            <h2 className="text-xl font-bold">Contact and verification</h2>
+            <h2 className="text-xl font-semibold">Contact and verification</h2>
             <div className="mt-5 space-y-4 text-sm">
               <div className="flex items-center justify-between gap-4 border-b border-stone-100 pb-4">
                 <div className="flex items-center gap-3">
@@ -132,14 +134,17 @@ export function AccountSettingsPage() {
                     </span>
                   </span>
                 </div>
-                <Link to="/verify-phone" className="text-xs font-bold text-brand hover:underline">
+                <Link
+                  to="/verify-phone"
+                  className="text-xs font-semibold text-brand hover:underline"
+                >
                   {user?.primaryPhoneNumber ? 'Manage' : 'Add'}
                 </Link>
               </div>
             </div>
           </section>
           <section className="rounded-xl border border-stone-200 bg-white p-6">
-            <h2 className="text-xl font-bold">Security</h2>
+            <h2 className="text-xl font-semibold">Security</h2>
             <p className="mt-2 text-sm text-stone-600">
               Your password, connected accounts, and active sessions are managed securely by Clerk.
             </p>

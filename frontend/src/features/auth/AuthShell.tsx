@@ -30,10 +30,10 @@ export function AuthShell({
             className="absolute inset-0 size-full object-cover opacity-55"
           />
           <div className="relative">
-            <p className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-orange-200">
+            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-orange-200">
               {eyebrow}
             </p>
-            <h1 className="max-w-md text-4xl font-black leading-tight tracking-tight sm:text-5xl">
+            <h1 className="max-w-md text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
               Your next great story starts here.
             </h1>
             <p className="mt-4 max-w-sm text-base leading-7 text-white/85">

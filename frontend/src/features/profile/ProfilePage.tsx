@@ -35,8 +35,8 @@ export function ProfilePage() {
   return (
     <SiteShell>
       <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand">Your account</p>
-        <h1 className="mt-2 text-4xl font-black">Welcome, {user?.firstName || 'friend'}</h1>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">Your account</p>
+        <h1 className="mt-2 text-4xl font-bold">Welcome, {user?.firstName || 'friend'}</h1>
         <p className="mt-3 text-stone-600">Your home for the moments you have saved and shared.</p>
         <div className="mt-8 grid gap-7 lg:grid-cols-[1fr_320px]">
           <section className="rounded-xl border border-stone-200 bg-white p-6">
@@ -49,7 +49,7 @@ export function ProfilePage() {
                 </span>
               )}
               <div>
-                <h2 className="text-xl font-black">
+                <h2 className="text-xl font-bold">
                   {user?.fullName || user?.firstName || 'EventNest member'}
                 </h2>
                 <p className="text-sm text-stone-500">{email || 'Email unavailable'}</p>
@@ -71,10 +71,10 @@ export function ProfilePage() {
             )}
           </section>
           <aside className="rounded-xl bg-ink p-6 text-white">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-orange-200">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-orange-200">
               Bring people together
             </p>
-            <h2 className="mt-3 text-2xl font-black">Have an event in mind?</h2>
+            <h2 className="mt-3 text-2xl font-bold">Have an event in mind?</h2>
             <p className="mt-3 text-sm leading-6 text-white/75">
               Explore the organizer workspace and see how venues, events and guests come together.
             </p>
@@ -86,7 +86,7 @@ export function ProfilePage() {
           </aside>
         </div>
         <section className="mt-10">
-          <h2 className="text-2xl font-black">Quick links</h2>
+          <h2 className="text-2xl font-bold">Quick links</h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-3">
             {shortcuts.map(({ to, label, description, icon: Icon }) => (
               <Link
@@ -95,7 +95,7 @@ export function ProfilePage() {
                 className="group rounded-xl border border-stone-200 bg-white p-5 hover:border-brand"
               >
                 <Icon aria-hidden="true" className="size-6 text-brand" />
-                <h3 className="mt-4 font-bold group-hover:text-brand">{label}</h3>
+                <h3 className="mt-4 font-semibold group-hover:text-brand">{label}</h3>
                 <p className="mt-1 text-sm text-stone-500">{description}</p>
               </Link>
             ))}

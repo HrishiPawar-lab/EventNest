@@ -26,7 +26,7 @@ function BookingSummary({ event, quantity }: { event: Event; quantity: number })
   return (
     <aside className="h-fit rounded-xl border border-stone-200 bg-white p-5 sm:p-6">
       <img src={event.image} alt="" className="aspect-[2.2] w-full rounded-lg object-cover" />
-      <h2 className="mt-5 text-xl font-black">{event.title}</h2>
+      <h2 className="mt-5 text-xl font-bold">{event.title}</h2>
       <p className="mt-3 flex items-center gap-2 text-sm text-stone-600">
         <LuCalendarDays aria-hidden="true" className="text-brand" /> {eventDate(event.date)} ·{' '}
         {event.time}
@@ -39,7 +39,7 @@ function BookingSummary({ event, quantity }: { event: Event; quantity: number })
           <span>General admission × {quantity}</span>
           <span>{formatPrice(event.price * quantity)}</span>
         </p>
-        <p className="mt-4 flex justify-between border-t border-stone-100 pt-4 text-lg font-black">
+        <p className="mt-4 flex justify-between border-t border-stone-100 pt-4 text-lg font-bold">
           <span>Estimated total</span>
           <span>{formatPrice(event.price * quantity)}</span>
         </p>
@@ -55,7 +55,7 @@ function MissingSelection() {
   return (
     <SiteShell>
       <main className="mx-auto max-w-4xl px-4 py-24 text-center">
-        <h1 className="text-3xl font-black">Choose an event first</h1>
+        <h1 className="text-3xl font-bold">Choose an event first</h1>
         <p className="mt-3 text-stone-600">We could not find that event in the preview catalog.</p>
         <Button asChild className="mt-6">
           <Link to="/explore">Explore events</Link>
@@ -81,8 +81,10 @@ export function BookingReviewPage() {
         </Link>
         <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_360px]">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand">Step 1 of 2</p>
-            <h1 className="mt-2 text-4xl font-black">Review your tickets</h1>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+              Step 1 of 2
+            </p>
+            <h1 className="mt-2 text-4xl font-bold">Review your tickets</h1>
             <p className="mt-3 text-stone-600">
               A quick look before checkout. Your selection stays with you if you need to sign in.
             </p>
@@ -92,7 +94,7 @@ export function BookingReviewPage() {
                   <LuTicket aria-hidden="true" />
                 </span>
                 <div>
-                  <h2 className="text-lg font-bold">General admission</h2>
+                  <h2 className="text-lg font-semibold">General admission</h2>
                   <p className="mt-1 text-sm text-stone-600">
                     One entry per ticket. No assigned seats.
                   </p>
@@ -140,14 +142,16 @@ export function CheckoutPage() {
         </Link>
         <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_360px]">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand">Step 2 of 2</p>
-            <h1 className="mt-2 text-4xl font-black">Checkout</h1>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+              Step 2 of 2
+            </p>
+            <h1 className="mt-2 text-4xl font-bold">Checkout</h1>
             <p className="mt-3 text-stone-600">
               Your selection is ready. Payment will open here when reservations and Razorpay are
               connected.
             </p>
             <div className="mt-8 rounded-xl border border-stone-200 bg-white p-6">
-              <h2 className="text-lg font-bold">Payment method</h2>
+              <h2 className="text-lg font-semibold">Payment method</h2>
               <div className="mt-5 rounded-lg border border-dashed border-stone-300 bg-paper px-5 py-8 text-center">
                 <LuLockKeyhole aria-hidden="true" className="mx-auto size-8 text-stone-400" />
                 <p className="mt-3 font-semibold">Secure payment is not available yet</p>
@@ -180,19 +184,19 @@ export function BookingConfirmationPage() {
         <span className="mx-auto flex size-16 items-center justify-center rounded-full bg-orange-100 text-brand">
           <LuCircleCheck aria-hidden="true" className="size-8" />
         </span>
-        <p className="mt-6 text-xs font-bold uppercase tracking-[0.2em] text-brand">
+        <p className="mt-6 text-xs font-semibold uppercase tracking-[0.2em] text-brand">
           Confirmation preview
         </p>
-        <h1 className="mt-2 text-4xl font-black">A great night is one step away</h1>
+        <h1 className="mt-2 text-4xl font-bold">A great night is one step away</h1>
         <p className="mx-auto mt-4 max-w-xl text-stone-600">
           This is how a booking confirmation will look once the payment service verifies a purchase.
           No booking or ticket has been created.
         </p>
         <div className="mx-auto mt-8 max-w-xl rounded-xl border border-stone-200 bg-white p-6 text-left">
-          <p className="text-xs font-bold uppercase tracking-widest text-stone-500">
+          <p className="text-xs font-semibold uppercase tracking-widest text-stone-500">
             Example order
           </p>
-          <h2 className="mt-3 text-xl font-black">{event.title}</h2>
+          <h2 className="mt-3 text-xl font-bold">{event.title}</h2>
           <p className="mt-2 text-sm text-stone-600">
             {eventDate(event.date)} · {event.venue}, {event.city}
           </p>

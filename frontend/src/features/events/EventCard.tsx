@@ -1,9 +1,20 @@
 import { useAuth } from '@clerk/react'
 import { useState } from 'react'
-import { LuArrowUpRight, LuHeart, LuMapPin } from 'react-icons/lu'
+import {
+  LuCalendarDays,
+  LuCpu,
+  LuHeart,
+  LuMapPin,
+  LuMusic2,
+  LuPalette,
+  LuTicket,
+  LuTrophy,
+  LuUtensils,
+  LuWrench,
+} from 'react-icons/lu'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { signInPathFor } from '../auth/returnTo'
-import { eventDate, formatPrice, type Event } from './catalog'
+import { eventDate, formatPrice, type Event, type EventCategory } from './catalog'
 import { useWishlist } from './wishlist'
 
 export function WishlistButton({
@@ -56,10 +67,24 @@ export function WishlistButton({
   )
 }
 
-export function EventCard({ event, compact = false }: { event: Event; compact?: boolean }) {
+const categoryIcons = {
+  Music: LuMusic2,
+  Food: LuUtensils,
+  Arts: LuPalette,
+  Sports: LuTrophy,
+  Technology: LuCpu,
+  Workshops: LuWrench,
+} satisfies Record<EventCategory, typeof LuMusic2>
+
+export function CategoryIcon({ category }: { category: EventCategory }) {
+  const Icon = categoryIcons[category]
+  return <Icon aria-hidden="true" className="size-4 shrink-0" />
+}
+
+export function EventCard({ event }: { event: Event }) {
   return (
-    <article className="group overflow-hidden rounded-xl border border-stone-200 bg-white">
-      <div className={`relative overflow-hidden ${compact ? 'aspect-[1.7]' : 'aspect-[1.45]'}`}>
+    <article className="group flex min-w-0 flex-col overflow-hidden rounded-xl border border-stone-200 bg-white">
+      <div className="relative aspect-[4/5] overflow-hidden">
         <Link
           to={`/events/${event.id}`}
           aria-label={`View ${event.title}`}
@@ -69,33 +94,35 @@ export function EventCard({ event, compact = false }: { event: Event; compact?: 
             src={event.image}
             alt=""
             loading="lazy"
-            className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.025]"
           />
         </Link>
         <WishlistButton eventId={event.id} className="absolute right-3 top-3" />
-        <span className="absolute bottom-3 left-3 rounded-md bg-white px-2.5 py-1 text-xs font-bold text-ink">
-          {event.category}
+        <span className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-md bg-white px-2.5 py-1.5 text-xs font-medium text-ink">
+          <CategoryIcon category={event.category} /> {event.category}
         </span>
       </div>
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-2">
-          <Link
-            to={`/events/${event.id}`}
-            className="line-clamp-2 text-lg font-bold leading-snug hover:text-brand"
-          >
-            {event.title}
-          </Link>
-          <LuArrowUpRight aria-hidden="true" className="mt-1 shrink-0 text-stone-400" />
-        </div>
-        <p className="mt-2 text-sm font-semibold text-brand">
+      <div className="flex flex-1 flex-col px-4 pb-4 pt-3.5">
+        <p className="flex items-center gap-1.5 text-sm font-medium text-brand-dark">
+          <LuCalendarDays aria-hidden="true" className="size-3.5 shrink-0" />
           {eventDate(event.date)} · {event.time}
         </p>
-        <p className="mt-1 flex items-center gap-1 text-sm text-stone-500">
-          <LuMapPin aria-hidden="true" /> {event.city} · {event.venue}
+        <Link
+          to={`/events/${event.id}`}
+          className="mt-2 line-clamp-2 min-h-12 text-[17px] font-semibold leading-6 text-ink hover:text-brand"
+        >
+          {event.title}
+        </Link>
+        <p className="mb-3 mt-1.5 flex items-start gap-1.5 text-[15px] leading-5 text-stone-600">
+          <LuMapPin aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
+          <span className="line-clamp-1">
+            {event.venue}, {event.city}
+          </span>
         </p>
-        <div className="mt-4 border-t border-stone-100 pt-3 text-sm text-stone-500">
-          <span className="text-base font-bold text-ink">{formatPrice(event.price)}</span> per
-          ticket
+        <div className="mt-auto flex items-center gap-1.5 border-t border-stone-100 pt-3 text-stone-600">
+          <LuTicket aria-hidden="true" className="size-4 shrink-0 text-brand" />
+          <span className="text-[15px] font-semibold text-ink">{formatPrice(event.price)}</span>
+          <span className="text-sm">per ticket</span>
         </div>
       </div>
     </article>

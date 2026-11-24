@@ -107,6 +107,35 @@ export const sampleEvents: Event[] = [
       'Learn something new in good company through a practical workshop made for curious beginners.',
     highlights: ['Small-group learning', 'Materials included', 'Take-home guide'],
   },
+  {
+    id: 'night-shift-sessions',
+    title: 'Night Shift Sessions',
+    category: 'Music',
+    city: 'Hyderabad',
+    venue: 'Warehouse 8',
+    date: '2027-04-24',
+    time: '8:00 PM',
+    price: 899,
+    image: '/images/stage.jpg',
+    organizer: 'Good Nights Collective',
+    description:
+      'An intimate night of live bands, new sounds and familiar faces in a space built for music.',
+    highlights: ['Live local bands', 'Open floor admission', 'Late-night food'],
+  },
+  {
+    id: 'jazz-by-the-bay',
+    title: 'Jazz by the Bay',
+    category: 'Music',
+    city: 'Mumbai',
+    venue: 'The Blue Room',
+    date: '2027-05-01',
+    time: '7:30 PM',
+    price: 1199,
+    image: '/images/jazz.jpg',
+    organizer: 'Blue Hour Sessions',
+    description: 'A relaxed evening of live jazz, warm lights and good company by the waterfront.',
+    highlights: ['Live jazz ensemble', 'Intimate setting', 'General admission'],
+  },
 ]
 
 export const categories: EventCategory[] = [

@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { ClerkProvider } from '@clerk/react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, useNavigate } from 'react-router-dom'
+import { IconContext } from 'react-icons'
 import { AppRoutes } from './app/router'
 import { OnboardingGate } from './features/auth/AuthRoutes'
 import './index.css'
@@ -49,9 +50,11 @@ if (!publishableKey) {
 } else {
   appRoot.render(
     <StrictMode>
-      <BrowserRouter>
-        <ApplicationRoutes />
-      </BrowserRouter>
+      <IconContext.Provider value={{ style: { strokeWidth: 1.5 } }}>
+        <BrowserRouter>
+          <ApplicationRoutes />
+        </BrowserRouter>
+      </IconContext.Provider>
     </StrictMode>,
   )
 }

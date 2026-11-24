@@ -46,7 +46,7 @@ export function OrganizerEventsPage() {
               />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <h2 className="truncate text-lg font-bold">{event.title}</h2>
+                  <h2 className="truncate text-lg font-semibold">{event.title}</h2>
                   <span
                     className={`rounded-md px-2 py-0.5 text-xs font-semibold ${index === 0 ? 'bg-orange-100 text-brand-dark' : 'bg-stone-100 text-stone-600'}`}
                   >
@@ -123,7 +123,7 @@ export function EventFormPage() {
         />
         {editing && !existing ? (
           <div role="alert" className="rounded-xl border border-stone-200 bg-white p-8">
-            <h2 className="text-xl font-bold">Event not found</h2>
+            <h2 className="text-xl font-semibold">Event not found</h2>
             <Button asChild className="mt-5">
               <Link to="/organizer/preview/events">Back to events</Link>
             </Button>
@@ -134,7 +134,7 @@ export function EventFormPage() {
             className="space-y-6 rounded-xl border border-stone-200 bg-white p-6"
           >
             <section>
-              <h2 className="text-lg font-bold">The essentials</h2>
+              <h2 className="text-lg font-semibold">The essentials</h2>
               <div className="mt-5 space-y-5">
                 <Field label="Event title" error={errors.title?.message}>
                   <Input {...register('title')} placeholder="Give your event a memorable name" />
@@ -150,7 +150,7 @@ export function EventFormPage() {
               </div>
             </section>
             <section className="border-t border-stone-100 pt-6">
-              <h2 className="text-lg font-bold">When and where</h2>
+              <h2 className="text-lg font-semibold">When and where</h2>
               <div className="mt-5 grid gap-5 sm:grid-cols-2">
                 <Field label="Venue" error={errors.venue?.message}>
                   <select
@@ -172,7 +172,7 @@ export function EventFormPage() {
               </div>
             </section>
             <section className="border-t border-stone-100 pt-6">
-              <h2 className="text-lg font-bold">One ticket, one price</h2>
+              <h2 className="text-lg font-semibold">One ticket, one price</h2>
               <p className="mt-1 text-sm text-stone-500">
                 EventNest v1 supports general admission with a single price.
               </p>
@@ -197,10 +197,10 @@ export function EventFormPage() {
         )}
         {preview && (
           <div role="status" className="mt-6 rounded-xl border border-orange-200 bg-orange-50 p-6">
-            <p className="text-xs font-bold uppercase tracking-widest text-brand">
+            <p className="text-xs font-semibold uppercase tracking-widest text-brand">
               Form preview · not saved
             </p>
-            <h2 className="mt-2 text-2xl font-black">{preview.title}</h2>
+            <h2 className="mt-2 text-2xl font-bold">{preview.title}</h2>
             <p className="mt-2 text-sm text-stone-600">
               {preview.date} · {preview.venue} · {formatPrice(preview.price)} · {preview.capacity}{' '}
               places
@@ -242,7 +242,7 @@ export function EventManagementPage() {
     return (
       <OrganizerShell>
         <main className="mx-auto max-w-4xl px-5 py-16">
-          <h1 className="text-3xl font-black">Event not found</h1>
+          <h1 className="text-3xl font-bold">Event not found</h1>
           <Button asChild className="mt-6">
             <Link to="/organizer/preview/events">My events</Link>
           </Button>
@@ -267,7 +267,7 @@ export function EventManagementPage() {
         <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
           <img src={event.image} alt="" className="aspect-[1.8] w-full rounded-xl object-cover" />
           <div className="rounded-xl border border-stone-200 bg-white p-6">
-            <span className="rounded-md bg-orange-100 px-2 py-1 text-xs font-bold text-brand-dark">
+            <span className="rounded-md bg-orange-100 px-2 py-1 text-xs font-semibold text-brand-dark">
               Example event
             </span>
             <div className="mt-5 space-y-4 text-sm">
@@ -300,7 +300,7 @@ export function EventManagementPage() {
               className="rounded-xl border border-stone-200 bg-white p-5 hover:border-brand"
             >
               <p className="text-sm text-stone-500">{item.label}</p>
-              <p className="mt-2 font-bold">{item.value}</p>
+              <p className="mt-2 font-semibold">{item.value}</p>
               <LuArrowRight aria-hidden="true" className="mt-4 text-brand" />
             </Link>
           ))}

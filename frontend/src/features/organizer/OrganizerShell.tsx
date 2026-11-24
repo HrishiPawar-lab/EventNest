@@ -80,8 +80,8 @@ export function OrganizerHeading({
   return (
     <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand">{eyebrow}</p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">{title}</h1>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">{eyebrow}</p>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{title}</h1>
         <p className="mt-2 text-sm text-stone-600">{description}</p>
       </div>
       {action}

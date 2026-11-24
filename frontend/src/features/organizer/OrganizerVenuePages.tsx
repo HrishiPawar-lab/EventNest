@@ -59,10 +59,10 @@ export function VenueManagementPage() {
             >
               <img src={venue.image} alt="" className="aspect-[1.7] w-full object-cover" />
               <div className="p-5">
-                <p className="text-xs font-bold uppercase tracking-widest text-brand">
+                <p className="text-xs font-semibold uppercase tracking-widest text-brand">
                   {venue.type}
                 </p>
-                <h2 className="mt-2 text-xl font-black">{venue.name}</h2>
+                <h2 className="mt-2 text-xl font-bold">{venue.name}</h2>
                 <p className="mt-2 flex items-center gap-2 text-sm text-stone-600">
                   <LuMapPin aria-hidden="true" /> {venue.city} ·{' '}
                   {venue.capacity.toLocaleString('en-IN')} capacity
@@ -128,7 +128,7 @@ export function VenueFormPage() {
         />
         {editing && !existing ? (
           <div role="alert" className="rounded-xl border border-stone-200 bg-white p-8">
-            <h2 className="text-xl font-bold">Venue not found</h2>
+            <h2 className="text-xl font-semibold">Venue not found</h2>
             <Button asChild className="mt-5">
               <Link to="/organizer/preview/venues">Back to venues</Link>
             </Button>
@@ -235,10 +235,10 @@ export function VenueFormPage() {
         )}
         {preview && (
           <div role="status" className="mt-6 rounded-xl border border-orange-200 bg-orange-50 p-6">
-            <p className="text-xs font-bold uppercase tracking-widest text-brand">
+            <p className="text-xs font-semibold uppercase tracking-widest text-brand">
               Form preview · not saved
             </p>
-            <h2 className="mt-2 text-2xl font-black">{preview.name}</h2>
+            <h2 className="mt-2 text-2xl font-bold">{preview.name}</h2>
             <p className="mt-2 text-sm text-stone-600">
               {preview.city}, {preview.state} · {preview.capacity} places
             </p>

@@ -3,7 +3,11 @@ import { useState, type ReactNode } from 'react'
 import {
   LuArrowRight,
   LuCalendarDays,
+  LuChevronDown,
+  LuCompass,
   LuHeart,
+  LuHouse,
+  LuLogOut,
   LuMenu,
   LuTicket,
   LuUserRound,
@@ -13,21 +17,21 @@ import { Button } from '../ui/button'
 import { clearDestination } from '../../features/auth/returnTo'
 
 const links = [
-  { to: '/', label: 'Home' },
-  { to: '/explore', label: 'Explore' },
-  { to: '/wishlist', label: 'Wishlist' },
-  { to: '/tickets', label: 'My Tickets' },
+  { to: '/', label: 'Home', icon: LuHouse },
+  { to: '/explore', label: 'Explore', icon: LuCompass },
+  { to: '/wishlist', label: 'Wishlist', icon: LuHeart },
+  { to: '/tickets', label: 'My Tickets', icon: LuTicket },
 ]
 
 export function Brand({ light = false }: { light?: boolean }) {
   return (
     <Link
       to="/"
-      className={`inline-flex items-center gap-2 text-lg font-black tracking-tight ${light ? 'text-white' : 'text-ink'}`}
+      className={`inline-flex items-center gap-2 text-lg font-bold tracking-tight ${light ? 'text-white' : 'text-ink'}`}
     >
       <span
         aria-hidden="true"
-        className="flex size-8 rotate-[-13deg] items-center justify-center rounded-md bg-brand text-lg font-black text-white"
+        className="flex size-8 rotate-[-13deg] items-center justify-center rounded-md bg-brand text-lg font-bold text-white"
       >
         N
       </span>
@@ -75,16 +79,16 @@ export function SiteShell({
         <div className="mx-auto flex h-18 max-w-7xl items-center justify-between gap-5 px-4 sm:px-6 lg:px-8">
           <Brand />
           <nav aria-label="Main navigation" className="hidden items-center gap-1 md:flex">
-            {links.map(({ to, label }) => (
+            {links.map(({ to, label, icon: Icon }) => (
               <NavLink
                 key={to}
                 to={to}
                 end={to === '/'}
                 className={({ isActive }) =>
-                  `border-b-2 px-4 py-6 text-sm font-semibold transition-colors ${isActive ? 'border-brand text-ink' : 'border-transparent text-stone-600 hover:text-ink'}`
+                  `flex items-center gap-2 border-b-2 px-3.5 py-6 text-[15px] font-medium transition-colors ${isActive ? 'border-brand text-ink' : 'border-transparent text-stone-600 hover:text-ink'}`
                 }
               >
-                {label}
+                <Icon aria-hidden="true" className="size-4" /> {label}
               </NavLink>
             ))}
           </nav>
@@ -93,7 +97,7 @@ export function SiteShell({
               <details className="group relative">
                 <summary
                   aria-label="Account menu"
-                  className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-stone-200 bg-white px-2 py-1.5 text-sm font-semibold hover:border-stone-400"
+                  className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-stone-200 bg-white px-2 py-1.5 text-[15px] font-medium hover:border-stone-400"
                 >
                   <span className="flex size-8 items-center justify-center rounded-full bg-ink text-white">
                     {user?.imageUrl ? (
@@ -107,6 +111,7 @@ export function SiteShell({
                     )}
                   </span>
                   <span className="max-w-28 truncate">{user?.firstName || 'My account'}</span>
+                  <LuChevronDown aria-hidden="true" className="mr-1 size-3.5 text-stone-500" />
                 </summary>
                 <div className="absolute right-0 mt-2 w-56 rounded-xl border border-stone-200 bg-white p-2 shadow-sm">
                   <MenuLink to="/profile" icon={<LuUserRound />} label="My profile" />
@@ -119,9 +124,9 @@ export function SiteShell({
                   />
                   <button
                     onClick={leave}
-                    className="w-full rounded-lg px-3 py-2 text-left text-sm text-stone-600 hover:bg-stone-100"
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-stone-600 hover:bg-stone-100"
                   >
-                    Sign out
+                    <LuLogOut aria-hidden="true" className="text-brand" /> Sign out
                   </button>
                   {signOutError && (
                     <p role="alert" className="px-3 pb-1 text-xs text-red-700">
@@ -134,7 +139,7 @@ export function SiteShell({
               <>
                 <Link
                   to={`/sign-in?return_to=${encodeURIComponent(location.pathname + location.search)}`}
-                  className="text-sm font-semibold"
+                  className="text-[15px] font-medium"
                 >
                   Sign in
                 </Link>
@@ -161,28 +166,30 @@ export function SiteShell({
             aria-label="Mobile navigation"
             className="border-t border-stone-200 bg-white p-3 md:hidden"
           >
-            {links.map(({ to, label }) => (
+            {links.map(({ to, label, icon: Icon }) => (
               <Link
                 key={to}
                 to={to}
                 onClick={() => setMobileOpen(false)}
-                className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-stone-100"
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-[15px] font-medium hover:bg-stone-100"
               >
-                {label}
+                <Icon aria-hidden="true" className="size-4 text-brand" /> {label}
               </Link>
             ))}
             <Link
               to={isSignedIn ? '/profile' : '/sign-in'}
               onClick={() => setMobileOpen(false)}
-              className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-stone-100"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-[15px] font-medium hover:bg-stone-100"
             >
+              <LuUserRound aria-hidden="true" className="size-4 text-brand" />
               {isSignedIn ? 'My profile' : 'Sign in'}
             </Link>
             <Link
               to="/become-organizer"
               onClick={() => setMobileOpen(false)}
-              className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-stone-100"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-[15px] font-medium hover:bg-stone-100"
             >
+              <LuCalendarDays aria-hidden="true" className="size-4 text-brand" />
               Become an organizer
             </Link>
           </nav>

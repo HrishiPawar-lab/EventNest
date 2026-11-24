@@ -23,7 +23,7 @@ export function EventDetailsPage() {
     return (
       <SiteShell>
         <main className="mx-auto max-w-4xl px-4 py-24 text-center">
-          <h1 className="text-3xl font-black">Event not found</h1>
+          <h1 className="text-3xl font-bold">Event not found</h1>
           <p className="mt-3 text-stone-600">
             The event may have moved or the link may be incorrect.
           </p>
@@ -52,19 +52,19 @@ export function EventDetailsPage() {
             />
             <div className="mt-8 border-b border-stone-200 pb-6">
               <div className="mb-4 flex items-center gap-3">
-                <span className="rounded-md bg-orange-100 px-2.5 py-1 text-xs font-bold text-brand-dark">
+                <span className="rounded-md bg-orange-100 px-2.5 py-1 text-xs font-semibold text-brand-dark">
                   {event.category}
                 </span>
                 <span className="text-xs font-semibold uppercase tracking-widest text-stone-500">
                   Featured experience
                 </span>
               </div>
-              <h1 className="text-4xl font-black tracking-tight sm:text-5xl">{event.title}</h1>
+              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">{event.title}</h1>
               <p className="mt-3 text-lg text-stone-600">{event.description}</p>
             </div>
             <div className="grid gap-8 border-b border-stone-200 py-8 sm:grid-cols-2">
               <section>
-                <h2 className="text-xl font-bold">What to expect</h2>
+                <h2 className="text-xl font-semibold">What to expect</h2>
                 <ul className="mt-4 space-y-3">
                   {event.highlights.map((highlight) => (
                     <li key={highlight} className="flex items-center gap-3 text-sm text-stone-600">
@@ -75,7 +75,7 @@ export function EventDetailsPage() {
                 </ul>
               </section>
               <section>
-                <h2 className="text-xl font-bold">The venue</h2>
+                <h2 className="text-xl font-semibold">The venue</h2>
                 <p className="mt-4 text-sm font-semibold">{event.venue}</p>
                 <p className="mt-1 text-sm text-stone-600">{event.city}, India</p>
                 <p className="mt-3 text-sm text-stone-500">
@@ -84,7 +84,7 @@ export function EventDetailsPage() {
               </section>
             </div>
             <section className="py-8">
-              <h2 className="text-xl font-bold">Hosted by</h2>
+              <h2 className="text-xl font-semibold">Hosted by</h2>
               <Link
                 to={`/organizers/${encodeURIComponent(event.organizer.toLowerCase().replaceAll(' ', '-'))}`}
                 className="mt-4 inline-flex items-center gap-3 rounded-lg border border-stone-200 bg-white px-4 py-3 font-semibold hover:border-brand"
@@ -99,10 +99,10 @@ export function EventDetailsPage() {
           <aside className="h-fit rounded-xl border border-stone-200 bg-white p-6 lg:sticky lg:top-24">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-stone-500">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
                   General admission
                 </p>
-                <p className="mt-2 text-3xl font-black">{formatPrice(event.price)}</p>
+                <p className="mt-2 text-3xl font-bold">{formatPrice(event.price)}</p>
                 <p className="text-sm text-stone-500">per ticket · example price</p>
               </div>
               <WishlistButton eventId={event.id} />
@@ -135,7 +135,7 @@ export function EventDetailsPage() {
                 >
                   <LuMinus aria-hidden="true" />
                 </button>
-                <output aria-live="polite" className="w-4 text-center font-bold">
+                <output aria-live="polite" className="w-4 text-center font-semibold">
                   {quantity}
                 </output>
                 <button
@@ -151,7 +151,7 @@ export function EventDetailsPage() {
             </div>
             <div className="mt-5 flex items-center justify-between border-t border-stone-200 pt-5">
               <span className="font-semibold">Estimated total</span>
-              <span className="text-xl font-black">{formatPrice(event.price * quantity)}</span>
+              <span className="text-xl font-bold">{formatPrice(event.price * quantity)}</span>
             </div>
             <Button asChild className="mt-5 w-full" size="lg">
               <Link to={`/booking/review/${event.id}?quantity=${quantity}`}>
@@ -164,13 +164,13 @@ export function EventDetailsPage() {
           </aside>
         </div>
         <section className="mt-12">
-          <h2 className="text-2xl font-black">You might also like</h2>
-          <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <h2 className="text-2xl font-bold">You might also like</h2>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {sampleEvents
               .filter((item) => item.id !== event.id)
-              .slice(0, 3)
+              .slice(0, 4)
               .map((item) => (
-                <EventCard key={item.id} event={item} compact />
+                <EventCard key={item.id} event={item} />
               ))}
           </div>
         </section>
@@ -189,7 +189,7 @@ export function PublicOrganizerPage() {
     return (
       <SiteShell>
         <main className="mx-auto max-w-4xl px-4 py-24 text-center">
-          <h1 className="text-3xl font-black">Organizer not found</h1>
+          <h1 className="text-3xl font-bold">Organizer not found</h1>
           <Button asChild className="mt-6">
             <Link to="/explore">Explore events</Link>
           </Button>
@@ -200,24 +200,24 @@ export function PublicOrganizerPage() {
     <SiteShell>
       <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="rounded-xl bg-ink px-8 py-12 text-white sm:px-12">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-orange-200">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-200">
             Event organizer
           </p>
-          <h1 className="mt-3 text-4xl font-black sm:text-5xl">{organizer}</h1>
+          <h1 className="mt-3 text-4xl font-bold sm:text-5xl">{organizer}</h1>
           <p className="mt-4 max-w-xl text-white/75">
             Thoughtful experiences, memorable places, and people worth gathering with.
           </p>
         </div>
         <div className="mt-10 flex items-end justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
               From this organizer
             </p>
-            <h2 className="mt-2 text-2xl font-black">Upcoming events</h2>
+            <h2 className="mt-2 text-2xl font-bold">Upcoming events</h2>
           </div>
           <span className="text-sm text-stone-500">Sample profile</span>
         </div>
-        <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {events.map((event) => (
             <EventCard key={event.id} event={event} />
           ))}

@@ -12,13 +12,13 @@ export function WishlistPage() {
   return (
     <SiteShell>
       <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand">Saved moments</p>
-        <h1 className="mt-2 text-4xl font-black">Your wishlist</h1>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">Saved moments</p>
+        <h1 className="mt-2 text-4xl font-bold">Your wishlist</h1>
         <p className="mt-3 text-stone-600">
           Keep interesting events close while you plan what is next.
         </p>
         {saved.length ? (
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {saved.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
@@ -29,7 +29,7 @@ export function WishlistPage() {
             className="mt-8 rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 text-center"
           >
             <LuHeart aria-hidden="true" className="mx-auto size-10 text-stone-400" />
-            <h2 className="mt-4 text-xl font-bold">No saved events yet</h2>
+            <h2 className="mt-4 text-xl font-semibold">No saved events yet</h2>
             <p className="mt-2 text-sm text-stone-600">
               Tap the heart on an event to keep it here.
             </p>

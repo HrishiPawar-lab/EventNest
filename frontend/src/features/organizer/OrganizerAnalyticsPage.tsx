@@ -32,14 +32,14 @@ export function OrganizerAnalyticsPage() {
                 <Icon aria-hidden="true" className="size-6 text-brand" />
                 <LuArrowUpRight aria-hidden="true" className="text-stone-400" />
               </div>
-              <p className="mt-5 text-2xl font-black">{value}</p>
+              <p className="mt-5 text-2xl font-bold">{value}</p>
               <p className="mt-1 text-sm text-stone-500">{label}</p>
             </div>
           ))}
         </div>
         <div className="mt-6 grid gap-6 lg:grid-cols-[1.4fr_0.8fr]">
           <section className="rounded-xl border border-stone-200 bg-white p-6">
-            <h2 className="text-xl font-bold">Sales over time</h2>
+            <h2 className="text-xl font-semibold">Sales over time</h2>
             <p className="mt-1 text-sm text-stone-500">Illustrative six-month trend</p>
             <div
               role="img"
@@ -62,19 +62,19 @@ export function OrganizerAnalyticsPage() {
             </div>
           </section>
           <section className="rounded-xl border border-stone-200 bg-white p-6">
-            <h2 className="text-xl font-bold">Useful signals</h2>
+            <h2 className="text-xl font-semibold">Useful signals</h2>
             <div className="mt-6 space-y-5">
               <div>
                 <p className="text-sm font-semibold">Most popular category</p>
-                <p className="mt-1 text-2xl font-black">Live music</p>
+                <p className="mt-1 text-2xl font-bold">Live music</p>
               </div>
               <div className="border-t border-stone-100 pt-5">
                 <p className="text-sm font-semibold">Returning attendees</p>
-                <p className="mt-1 text-2xl font-black">28%</p>
+                <p className="mt-1 text-2xl font-bold">28%</p>
               </div>
               <div className="border-t border-stone-100 pt-5">
                 <p className="text-sm font-semibold">Average order size</p>
-                <p className="mt-1 text-2xl font-black">2 tickets</p>
+                <p className="mt-1 text-2xl font-bold">2 tickets</p>
               </div>
             </div>
           </section>

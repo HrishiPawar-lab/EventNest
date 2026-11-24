@@ -27,10 +27,10 @@ export function BecomeOrganizerPage() {
       <main>
         <section className="bg-ink px-4 py-16 text-white sm:px-6 lg:py-20">
           <div className="mx-auto max-w-6xl">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-orange-200">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-200">
               For the people who bring us together
             </p>
-            <h1 className="mt-4 max-w-2xl text-4xl font-black leading-tight sm:text-6xl">
+            <h1 className="mt-4 max-w-2xl text-4xl font-bold leading-tight sm:text-6xl">
               Make your next event happen.
             </h1>
             <p className="mt-5 max-w-xl text-lg leading-7 text-white/75">
@@ -45,16 +45,18 @@ export function BecomeOrganizerPage() {
           </div>
         </section>
         <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand">How it works</p>
-          <h2 className="mt-2 text-3xl font-black">From idea to open doors</h2>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+            How it works
+          </p>
+          <h2 className="mt-2 text-3xl font-bold">From idea to open doors</h2>
           <div className="mt-7 grid gap-5 md:grid-cols-3">
             {steps.map(({ title, text, icon: Icon }, index) => (
               <div key={title} className="rounded-xl border border-stone-200 bg-white p-6">
                 <div className="flex items-center justify-between">
                   <Icon aria-hidden="true" className="size-7 text-brand" />
-                  <span className="text-xs font-bold text-stone-400">0{index + 1}</span>
+                  <span className="text-xs font-semibold text-stone-400">0{index + 1}</span>
                 </div>
-                <h3 className="mt-7 text-lg font-bold">{title}</h3>
+                <h3 className="mt-7 text-lg font-semibold">{title}</h3>
                 <p className="mt-2 text-sm leading-6 text-stone-600">{text}</p>
               </div>
             ))}
@@ -64,7 +66,7 @@ export function BecomeOrganizerPage() {
           <div className="flex flex-wrap items-start gap-4 rounded-xl border border-orange-200 bg-orange-50 p-6">
             <LuShieldAlert aria-hidden="true" className="size-6 text-brand" />
             <div className="flex-1">
-              <h2 className="font-bold">Organizer access is not available yet</h2>
+              <h2 className="font-semibold">Organizer access is not available yet</h2>
               <p className="mt-1 text-sm leading-6 text-stone-700">
                 The current backend has no endpoint to grant organizer permissions or create venues
                 and events. You can explore the preview workspace; no records will be changed.
@@ -82,7 +84,7 @@ export function OrganizerAccessDeniedPage() {
     <SiteShell>
       <main className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6">
         <LuShieldAlert aria-hidden="true" className="mx-auto size-10 text-brand" />
-        <h1 className="mt-5 text-3xl font-black">Organizer access required</h1>
+        <h1 className="mt-5 text-3xl font-bold">Organizer access required</h1>
         <p className="mt-3 text-stone-600">
           This action is available to accounts with organizer permissions. You can still explore the
           sample workspace.

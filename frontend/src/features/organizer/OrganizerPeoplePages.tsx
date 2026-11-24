@@ -21,7 +21,7 @@ export function AttendeeManagementPage() {
         <div className="rounded-xl border border-stone-200 bg-white">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 p-5">
             <div>
-              <h2 className="text-lg font-bold">Guest list preview</h2>
+              <h2 className="text-lg font-semibold">Guest list preview</h2>
               <p className="text-sm text-stone-500">
                 Illustrative records — no attendee data is connected
               </p>
@@ -69,7 +69,7 @@ export function AttendeeManagementPage() {
         </div>
         <div className="mt-6 rounded-xl border border-dashed border-stone-300 bg-white p-6">
           <LuUsers aria-hidden="true" className="text-brand" />
-          <h2 className="mt-3 text-lg font-bold">Live bookings will appear here</h2>
+          <h2 className="mt-3 text-lg font-semibold">Live bookings will appear here</h2>
           <p className="mt-2 max-w-xl text-sm text-stone-600">
             Attendee lists must come from verified tickets. No one can be added, removed or checked
             in from this preview.
@@ -91,7 +91,7 @@ export function CheckInPage() {
         />
         <div className="grid gap-6 md:grid-cols-[1fr_0.8fr]">
           <section className="rounded-xl border border-stone-200 bg-white p-6">
-            <h2 className="text-xl font-bold">Scan a ticket</h2>
+            <h2 className="text-xl font-semibold">Scan a ticket</h2>
             <p className="mt-2 text-sm text-stone-600">
               The camera scanner will verify credentials against the backend and mark each valid
               ticket used exactly once.
@@ -108,7 +108,7 @@ export function CheckInPage() {
           </section>
           <section className="rounded-xl border border-orange-200 bg-orange-50 p-6">
             <LuShieldAlert aria-hidden="true" className="size-7 text-brand" />
-            <h2 className="mt-4 text-xl font-bold">Every check-in is verified</h2>
+            <h2 className="mt-4 text-xl font-semibold">Every check-in is verified</h2>
             <p className="mt-3 text-sm leading-6 text-stone-700">
               Scanning a code on a device is not enough to grant entry. A live check-in needs the
               backend to validate an opaque QR credential and atomically update ticket status.
@@ -119,7 +119,7 @@ export function CheckInPage() {
               </p>
               <Link
                 to="/organizer/preview/attendees"
-                className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-brand"
+                className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-brand"
               >
                 View attendee preview <LuArrowRight aria-hidden="true" />
               </Link>

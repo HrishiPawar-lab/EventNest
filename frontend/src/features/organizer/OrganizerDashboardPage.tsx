@@ -31,7 +31,7 @@ export function OrganizerDashboardPage() {
           {stats.map(({ label, value, icon: Icon, note }) => (
             <div key={label} className="rounded-xl border border-stone-200 bg-white p-5">
               <Icon aria-hidden="true" className="size-6 text-brand" />
-              <p className="mt-4 text-3xl font-black">{value}</p>
+              <p className="mt-4 text-3xl font-bold">{value}</p>
               <p className="mt-1 text-sm font-semibold">{label}</p>
               <p className="mt-2 text-xs text-stone-500">{note}</p>
             </div>
@@ -41,12 +41,12 @@ export function OrganizerDashboardPage() {
           <section className="rounded-xl border border-stone-200 bg-white p-6">
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-lg font-bold">Event performance</h2>
+                <h2 className="text-lg font-semibold">Event performance</h2>
                 <p className="text-sm text-stone-500">
                   Illustrative ticket activity over 12 months
                 </p>
               </div>
-              <span className="rounded-md bg-orange-100 px-2 py-1 text-xs font-bold text-brand-dark">
+              <span className="rounded-md bg-orange-100 px-2 py-1 text-xs font-semibold text-brand-dark">
                 Preview
               </span>
             </div>
@@ -70,7 +70,7 @@ export function OrganizerDashboardPage() {
             </div>
           </section>
           <section className="rounded-xl border border-stone-200 bg-white p-6">
-            <h2 className="text-lg font-bold">Upcoming in your workspace</h2>
+            <h2 className="text-lg font-semibold">Upcoming in your workspace</h2>
             <p className="mt-1 text-sm text-stone-500">Example events for layout preview</p>
             <div className="mt-5 space-y-4">
               {sampleEvents.slice(0, 3).map((event) => (
@@ -89,7 +89,7 @@ export function OrganizerDashboardPage() {
             </div>
             <Link
               to="/organizer/preview/events"
-              className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-brand"
+              className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-brand"
             >
               View all events <LuArrowRight aria-hidden="true" />
             </Link>
@@ -97,7 +97,7 @@ export function OrganizerDashboardPage() {
         </div>
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-xl bg-ink p-6 text-white">
           <div>
-            <h2 className="text-xl font-black">Set the stage for something great.</h2>
+            <h2 className="text-xl font-bold">Set the stage for something great.</h2>
             <p className="mt-1 text-sm text-white/70">
               Start with a venue, then shape your event around it.
             </p>

@@ -53,10 +53,10 @@ export function ExplorePage({ searchResults = false }: { searchResults?: boolean
     <SiteShell>
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand">
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-brand">
             Find your next moment
           </p>
-          <h1 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">
+          <h1 className="mt-2 text-4xl font-semibold tracking-tight sm:text-5xl">
             {searchResults ? 'Search results' : 'Explore events'}
           </h1>
           <p className="mt-3 max-w-xl text-stone-600">
@@ -74,7 +74,7 @@ export function ExplorePage({ searchResults = false }: { searchResults?: boolean
             aria-label="Search events"
             placeholder="Search by event, venue or city"
             maxLength={100}
-            className="min-w-0 flex-1 px-2 py-2 text-sm outline-none"
+            className="min-w-0 flex-1 px-2 py-2 text-[15px] outline-none"
           />
           <Button type="submit" size="sm">
             Search
@@ -85,7 +85,7 @@ export function ExplorePage({ searchResults = false }: { searchResults?: boolean
           aria-expanded={filtersOpen}
           aria-controls="event-filters"
           onClick={() => setFiltersOpen(!filtersOpen)}
-          className="mb-5 flex w-full items-center justify-between rounded-lg border border-stone-300 bg-white px-4 py-3 text-sm font-bold lg:hidden"
+          className="mb-5 flex w-full items-center justify-between rounded-lg border border-stone-300 bg-white px-4 py-3 text-[15px] font-medium lg:hidden"
         >
           <span className="flex items-center gap-2">
             <LuSlidersHorizontal aria-hidden="true" /> Filters
@@ -98,19 +98,19 @@ export function ExplorePage({ searchResults = false }: { searchResults?: boolean
             className={`h-fit rounded-xl border border-stone-200 bg-white p-5 ${filtersOpen ? '' : 'hidden lg:block'}`}
           >
             <div className="flex items-center justify-between">
-              <h2 className="flex items-center gap-2 text-lg font-bold">
+              <h2 className="flex items-center gap-2 text-lg font-semibold">
                 <LuSlidersHorizontal aria-hidden="true" /> Filters
               </h2>
               <button
                 type="button"
                 onClick={() => setParams(query ? { q: query } : {})}
-                className="text-xs font-bold text-brand hover:underline"
+                className="text-sm font-medium text-brand hover:underline"
               >
                 Clear all
               </button>
             </div>
             <fieldset className="mt-6 border-t border-stone-100 pt-5">
-              <legend className="text-sm font-bold">Event type</legend>
+              <legend className="text-[15px] font-medium">Event type</legend>
               <div className="mt-3 space-y-2">
                 <label className="flex items-center gap-2 text-sm text-stone-600">
                   <input
@@ -137,7 +137,7 @@ export function ExplorePage({ searchResults = false }: { searchResults?: boolean
               </div>
             </fieldset>
             <div className="mt-6 border-t border-stone-100 pt-5">
-              <label htmlFor="city-filter" className="text-sm font-bold">
+              <label htmlFor="city-filter" className="text-[15px] font-medium">
                 Location
               </label>
               <select
@@ -153,7 +153,7 @@ export function ExplorePage({ searchResults = false }: { searchResults?: boolean
               </select>
             </div>
             <div className="mt-6 border-t border-stone-100 pt-5">
-              <label htmlFor="price-filter" className="text-sm font-bold">
+              <label htmlFor="price-filter" className="text-[15px] font-medium">
                 Maximum price
               </label>
               <input
@@ -174,8 +174,8 @@ export function ExplorePage({ searchResults = false }: { searchResults?: boolean
           </aside>
           <div>
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-              <p className="text-sm text-stone-600">
-                <span className="font-bold text-ink">{visible.length}</span>{' '}
+              <p className="text-[15px] text-stone-600">
+                <span className="font-semibold text-ink">{visible.length}</span>{' '}
                 {visible.length === 1 ? 'sample event' : 'sample events'} found{' '}
                 {query && (
                   <>
@@ -183,12 +183,12 @@ export function ExplorePage({ searchResults = false }: { searchResults?: boolean
                   </>
                 )}
               </p>
-              <label className="flex items-center gap-2 text-sm text-stone-600">
+              <label className="flex items-center gap-2 text-[15px] text-stone-600">
                 Sort by
                 <select
                   value={sort}
                   onChange={(event) => update('sort', event.target.value)}
-                  className="h-10 rounded-lg border border-stone-300 bg-white px-3 text-sm font-semibold text-ink"
+                  className="h-10 rounded-lg border border-stone-300 bg-white px-3 text-[15px] font-medium text-ink"
                 >
                   <option value="date">Soonest</option>
                   <option value="price">Lowest price</option>
@@ -196,9 +196,9 @@ export function ExplorePage({ searchResults = false }: { searchResults?: boolean
               </label>
             </div>
             {visible.length ? (
-              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {visible.map((event) => (
-                  <EventCard key={event.id} event={event} compact />
+                  <EventCard key={event.id} event={event} />
                 ))}
               </div>
             ) : (
@@ -207,7 +207,7 @@ export function ExplorePage({ searchResults = false }: { searchResults?: boolean
                 className="rounded-xl border border-dashed border-stone-300 bg-white px-6 py-16 text-center"
               >
                 <LuSearch aria-hidden="true" className="mx-auto size-8 text-stone-400" />
-                <h2 className="mt-4 text-xl font-bold">No events match those filters</h2>
+                <h2 className="mt-4 text-xl font-semibold">No events match those filters</h2>
                 <p className="mt-2 text-sm text-stone-600">
                   Try another city, category, or price range.
                 </p>
