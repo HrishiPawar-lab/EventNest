@@ -4,13 +4,29 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
-import { clerkErrorMessage } from './clerkErrors'
+import { clerkErrorMessage, phoneVerificationErrorMessage } from './clerkErrors'
 
 const codeSchema = z.object({
   code: z.string().regex(/^\d{4,8}$/, 'Enter the code from your message'),
 })
 
-export function VerificationCodeForm({ kind, target, onSend, onVerify, initialSent = false }) {
+type CodeValues = z.infer<typeof codeSchema>
+
+type VerificationCodeFormProps = {
+  kind: 'email' | 'phone'
+  target: string
+  onSend: () => Promise<unknown>
+  onVerify: (code: string) => Promise<void>
+  initialSent?: boolean
+}
+
+export function VerificationCodeForm({
+  kind,
+  target,
+  onSend,
+  onVerify,
+  initialSent = false,
+}: VerificationCodeFormProps) {
   const [sent, setSent] = useState(initialSent)
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
@@ -19,7 +35,7 @@ export function VerificationCodeForm({ kind, target, onSend, onVerify, initialSe
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm({ resolver: zodResolver(codeSchema) })
+  } = useForm<CodeValues>({ resolver: zodResolver(codeSchema) })
 
   async function send() {
     setError('')
@@ -29,19 +45,19 @@ export function VerificationCodeForm({ kind, target, onSend, onVerify, initialSe
       setSent(true)
       setFeedback('A new code is on its way.')
     } catch (cause) {
-      setError(clerkErrorMessage(cause))
+      setError(kind === 'phone' ? phoneVerificationErrorMessage(cause) : clerkErrorMessage(cause))
     } finally {
       setSending(false)
     }
   }
 
-  async function verify({ code }) {
+  async function verify({ code }: CodeValues) {
     setError('')
     try {
       await onVerify(code)
       setFeedback('Verified. Taking you back...')
     } catch (cause) {
-      setError(clerkErrorMessage(cause))
+      setError(kind === 'phone' ? phoneVerificationErrorMessage(cause) : clerkErrorMessage(cause))
     }
   }
 

@@ -1,9 +1,15 @@
 import { useAuth } from '@clerk/react'
 import { useCallback } from 'react'
 
+type AuthenticatedRequestOptions = RequestInit & {
+  getToken: () => Promise<string | null>
+  fetcher?: typeof fetch
+  baseUrl?: string
+}
+
 export async function authenticatedRequest(
-  path,
-  { getToken, fetcher = fetch, baseUrl, ...options },
+  path: string,
+  { getToken, fetcher = fetch, baseUrl, ...options }: AuthenticatedRequestOptions,
 ) {
   if (typeof path !== 'string' || !path.startsWith('/') || /^\/[\\/]/.test(path)) {
     throw new Error('API path must be a relative path beginning with /')
@@ -25,7 +31,7 @@ export async function authenticatedRequest(
 export function useAuthenticatedApi() {
   const { getToken } = useAuth()
   return useCallback(
-    (path, options = {}) =>
+    (path: string, options: Omit<AuthenticatedRequestOptions, 'getToken' | 'baseUrl'> = {}) =>
       authenticatedRequest(path, {
         ...options,
         getToken,

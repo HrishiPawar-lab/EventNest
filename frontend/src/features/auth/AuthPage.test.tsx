@@ -5,11 +5,11 @@ import { AuthPage } from './AuthPage'
 
 const clerkComponents = vi.hoisted(() => ({ signIn: vi.fn(), signUp: vi.fn() }))
 vi.mock('@clerk/react', () => ({
-  SignIn: (props) => {
+  SignIn: (props: unknown) => {
     clerkComponents.signIn(props)
     return <div>Clerk sign-in form</div>
   },
-  SignUp: (props) => {
+  SignUp: (props: unknown) => {
     clerkComponents.signUp(props)
     return <div>Clerk sign-up form</div>
   },
@@ -30,7 +30,7 @@ describe('Clerk authentication screens', () => {
       </MemoryRouter>,
     )
     expect(screen.getByText('Clerk sign-in form')).toBeTruthy()
-    expect(clerkComponents.signIn.mock.lastCall[0]).toMatchObject({
+    expect(clerkComponents.signIn.mock.lastCall?.[0]).toMatchObject({
       routing: 'path',
       path: '/sign-in',
       fallbackRedirectUrl: '/auth/complete',
@@ -48,7 +48,7 @@ describe('Clerk authentication screens', () => {
       </MemoryRouter>,
     )
     expect(screen.getByText('Clerk sign-up form')).toBeTruthy()
-    expect(clerkComponents.signUp.mock.lastCall[0]).toMatchObject({
+    expect(clerkComponents.signUp.mock.lastCall?.[0]).toMatchObject({
       routing: 'path',
       path: '/sign-up',
       fallbackRedirectUrl: '/auth/complete',

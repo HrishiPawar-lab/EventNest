@@ -1,9 +1,14 @@
 # EventNest --- Database Architecture Specification
 
-**Version:** 1.0\
+**Version:** 1.1\
 **Status:** Approved baseline for v1 database implementation\
 **Database:** MongoDB\
 **ODM:** Mongoose
+
+**v1.1 decision (2026-11-24):** Phone numbers are optional because SMS
+verification is unavailable for some users and countries. Verified email
+remains mandatory for account access. A supplied phone remains unique and
+must use E.164 format; only a verified phone may be treated as verified.
 
 ## 1. Agreed v1 constraints
 
@@ -72,7 +77,7 @@ Application profile; Clerk remains the identity provider.
   clerkId: String,             // Unique Clerk user ID
   name: String,
   email: String,               // Required, normalized lowercase
-  phoneNumber: String,         // Required, E.164; unique
+  phoneNumber: String,         // Optional, E.164; unique when present
   profilePicture: String,
   roles: ["attendee"],         // attendee, organizer; may contain both
   location: { city: String, state: String, country: String },
@@ -83,11 +88,15 @@ Application profile; Clerk remains the identity provider.
 }
 ```
 
-Rules: - `clerkId`, `email`, and `phoneNumber` are unique. - Never store
-passwords, OAuth tokens, or Clerk session tokens. - Clerk is
-authoritative for authentication. Trusted Clerk events synchronize
-verification state. - Internal references use MongoDB `users._id`, never
-Clerk IDs.
+Rules:
+
+- `clerkId` and `email` are unique; `phoneNumber` is unique when present.
+- A verified email is required for account access; phone is optional and
+  an unverified phone is not a verified contact.
+- Never store passwords, OAuth tokens, or Clerk session tokens.
+- Clerk is authoritative for authentication. Trusted Clerk events
+  synchronize verification state.
+- Internal references use MongoDB `users._id`, never Clerk IDs.
 
 ### 4.2 `venues`
 
@@ -296,7 +305,7 @@ a query-based reason.
 
   users                   `{ email: 1 }` unique                             Unique normalized email
 
-  users                   `{ phoneNumber: 1 }` unique                       Unique phone
+  users                   `{ phoneNumber: 1 }` unique partial               Unique phone when present
 
   venues                  `{ organizerId: 1 }`                              Organizer's venues
 
@@ -351,12 +360,17 @@ a query-based reason.
                                                                             event, if needed
   -------------------------------------------------------------------------------------------------
 
-Index notes: - Confirm required fields before simple unique indexes. -
-Use a partial unique index for optional provider IDs. - A compound index
-supports its leading prefix; `{ userId: 1, eventId: 1 }` does not
-efficiently support event-only lookup. - Use `explain("executionStats")`
-to validate query performance. - Avoid redundant indexes and blindly
-rebuilding production indexes.
+Index notes:
+
+- Confirm required fields before simple unique indexes.
+- Use a partial unique index for optional phone numbers and provider IDs.
+  The phone index filters for string values of `phoneNumber`; replacing an
+  existing nonpartial unique phone index requires an explicit migration.
+- A compound index supports its leading prefix;
+  `{ userId: 1, eventId: 1 }` does not efficiently support event-only
+  lookup.
+- Use `explain("executionStats")` to validate query performance.
+- Avoid redundant indexes and blindly rebuilding production indexes.
 
 ## 6. Data integrity invariants
 

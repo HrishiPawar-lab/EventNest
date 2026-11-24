@@ -34,10 +34,7 @@ export function createRequireEventNestUser({
         return;
       }
 
-      if (
-        user.verification?.emailVerified !== true ||
-        user.verification?.phoneVerified !== true
-      ) {
+      if (user.verification?.emailVerified !== true) {
         response.status(403).json({
           error: {
             code: 'VERIFICATION_REQUIRED',

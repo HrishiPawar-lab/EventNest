@@ -44,12 +44,13 @@ function mappedFields(clerkUser) {
 
   if (validEmail) fields.email = email;
   if (validPhone) fields.phoneNumber = phoneNumber;
+  else unset.phoneNumber = '';
   if (name) fields.name = name;
   else unset.name = '';
   if (profilePicture) fields.profilePicture = profilePicture;
   else unset.profilePicture = '';
 
-  return { fields, unset, complete: validEmail && validPhone };
+  return { fields, unset, complete: validEmail };
 }
 
 async function deactivateUser(userModel, clerkId) {

@@ -14,7 +14,6 @@ const userSchema = new mongoose.Schema(
     },
     phoneNumber: {
       type: String,
-      required: true,
       trim: true,
       validate: { validator: isE164, message: 'Phone number must be E.164' },
     },
@@ -52,6 +51,13 @@ const userSchema = new mongoose.Schema(
 
 userSchema.index({ clerkId: 1 }, { unique: true });
 userSchema.index({ email: 1 }, { unique: true });
-userSchema.index({ phoneNumber: 1 }, { unique: true });
+userSchema.index(
+  { phoneNumber: 1 },
+  {
+    name: 'phoneNumber_unique_when_present',
+    unique: true,
+    partialFilterExpression: { phoneNumber: { $type: 'string' } },
+  },
+);
 
 export const User = mongoose.model('User', userSchema);

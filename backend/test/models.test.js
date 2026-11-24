@@ -128,8 +128,20 @@ test('user normalizes email, supports both roles, and rejects invalid contact da
   assert.deepEqual(user.roles, ['attendee', 'organizer']);
   assert.equal(user.verification.emailVerified, false);
   assert.equal(user.verification.phoneVerified, false);
+  const userWithoutPhone = new User({
+    clerkId: 'user_no_phone',
+    email: 'no-phone@example.com',
+  });
+  await userWithoutPhone.validate();
+  assert.equal(userWithoutPhone.phoneNumber, undefined);
   await assert.rejects(
     new User({ ...validUser(), phoneNumber: '4155552671' }).validate(),
+  );
+  await assert.rejects(
+    new User({ ...validUser(), phoneNumber: '   ' }).validate(),
+  );
+  await assert.rejects(
+    new User({ ...validUser(), phoneNumber: null }).validate(),
   );
   await assert.rejects(
     new User({ ...validUser(), email: 'invalid' }).validate(),
@@ -291,9 +303,20 @@ test('wishlist requires both references and has only createdAt timestamp', async
 });
 
 test('index blueprint includes unique and query indexes without speculative TTL', () => {
-  for (const key of ['clerkId', 'email', 'phoneNumber']) {
+  for (const key of ['clerkId', 'email']) {
     assert.ok(hasIndex(User, { [key]: 1 }, { unique: true }));
   }
+  assert.ok(
+    hasIndex(
+      User,
+      { phoneNumber: 1 },
+      {
+        name: 'phoneNumber_unique_when_present',
+        unique: true,
+        partialFilterExpression: { phoneNumber: { $type: 'string' } },
+      },
+    ),
+  );
   assert.ok(hasIndex(Venue, { organizerId: 1 }));
   assert.ok(hasIndex(Venue, { 'address.city': 1 }));
   assert.ok(hasIndex(Venue, { location: '2dsphere' }));

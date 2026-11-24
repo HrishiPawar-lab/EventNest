@@ -1,4 +1,8 @@
-export function LoadingScreen({ message = 'Loading your EventNest account...' }) {
+export function LoadingScreen({
+  message = 'Loading your EventNest account...',
+}: {
+  message?: string
+}) {
   return (
     <div
       className="flex min-h-screen items-center justify-center bg-sky-50 px-5 text-slate-700"

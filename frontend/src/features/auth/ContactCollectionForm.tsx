@@ -4,28 +4,36 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
-import { clerkErrorMessage } from './clerkErrors'
+import { clerkErrorMessage, phoneVerificationErrorMessage } from './clerkErrors'
 
 const emailSchema = z.object({ contact: z.email('Enter a valid email address') })
 const phoneSchema = z.object({
   contact: z.string().regex(/^\+[1-9]\d{1,14}$/, 'Use international format, such as +919876543210'),
 })
 
-export function ContactCollectionForm({ kind, onSubmit }) {
+type ContactValues = z.infer<typeof emailSchema>
+
+export function ContactCollectionForm({
+  kind,
+  onSubmit,
+}: {
+  kind: 'email' | 'phone'
+  onSubmit: (contact: string) => Promise<void>
+}) {
   const isPhone = kind === 'phone'
   const [error, setError] = useState('')
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm({ resolver: zodResolver(isPhone ? phoneSchema : emailSchema) })
+  } = useForm<ContactValues>({ resolver: zodResolver(isPhone ? phoneSchema : emailSchema) })
 
-  async function submit(values) {
+  async function submit(values: ContactValues) {
     setError('')
     try {
       await onSubmit(values.contact)
     } catch (cause) {
-      setError(clerkErrorMessage(cause))
+      setError(isPhone ? phoneVerificationErrorMessage(cause) : clerkErrorMessage(cause))
     }
   }
 

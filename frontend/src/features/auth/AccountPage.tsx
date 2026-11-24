@@ -8,6 +8,7 @@ import { clearDestination } from './returnTo'
 
 export function AccountPage() {
   const { user } = useUser()
+  const phoneVerified = user?.primaryPhoneNumber?.verification?.status === 'verified'
   const { signOut } = useClerk()
   const [error, setError] = useState('')
   const [signingOut, setSigningOut] = useState(false)
@@ -47,9 +48,15 @@ export function AccountPage() {
                 <LuMailCheck aria-hidden="true" className="text-amber-600" /> Email verified
               </p>
               <p className="flex items-center gap-2">
-                <LuPhoneCall aria-hidden="true" className="text-amber-600" /> Phone verified
+                <LuPhoneCall aria-hidden="true" className="text-amber-600" />{' '}
+                {phoneVerified ? 'Phone verified' : 'Phone not added (optional)'}
               </p>
             </div>
+            {!phoneVerified && (
+              <Button asChild variant="outline">
+                <Link to="/verify-phone">Add a phone number</Link>
+              </Button>
+            )}
             {error && (
               <p role="alert" className="text-sm text-red-700">
                 {error}

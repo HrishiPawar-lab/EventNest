@@ -280,19 +280,25 @@ test('invalid signatures and missing headers never reach Clerk or MongoDB', asyn
   assert.equal(harness.users.calls.length, 0);
 });
 
-test('incomplete contact data never creates an invalid user and clears existing verification', async (t) => {
+test('missing or invalid phone syncs an email profile and clears a stale phone', async (t) => {
   const harness = await webhookHarness(t);
   harness.clerkUsers.set('user_123', clerkUser({ phoneNumbers: [] }));
   const missingPhone = await harness.post(event('user.created'));
   assert.equal(missingPhone.status, 200);
-  assert.deepEqual(await missingPhone.json(), { status: 'incomplete' });
-  assert.equal(harness.users.users.size, 0);
-  assert.equal(harness.users.calls.at(-1).options.upsert, false);
+  assert.deepEqual(await missingPhone.json(), { status: 'synced' });
+  const user = harness.users.users.get('user_123');
+  assert.equal(user.email, 'ada@example.com');
+  assert.equal(user.phoneNumber, undefined);
+  assert.deepEqual(user.verification, {
+    emailVerified: true,
+    phoneVerified: false,
+  });
+  assert.equal(harness.users.calls.at(-1).options.upsert, true);
 
-  harness.clerkUsers.set('user_123', clerkUser({ emailAddresses: [] }));
-  const missingEmail = await harness.post(event('user.updated'));
-  assert.equal(missingEmail.status, 200);
-  assert.equal(harness.users.users.size, 0);
+  harness.clerkUsers.set('user_123', clerkUser());
+  await harness.post(event('user.updated'));
+  assert.equal(user.phoneNumber, '+14155552671');
+  assert.equal(user.verification.phoneVerified, true);
 
   harness.clerkUsers.set(
     'user_123',
@@ -307,16 +313,27 @@ test('incomplete contact data never creates an invalid user and clears existing 
     }),
   );
   assert.equal((await harness.post(event('user.updated'))).status, 200);
+  assert.equal(user.phoneNumber, undefined);
+  assert.equal(user.verification.phoneVerified, false);
+
+  harness.clerkUsers.set('user_123', clerkUser({ phoneNumbers: [] }));
+  await harness.post(event('user.updated'));
+  assert.equal(user.phoneNumber, undefined);
+  assert.equal(user.verification.phoneVerified, false);
+});
+
+test('missing email does not create a user and clears existing email verification', async (t) => {
+  const harness = await webhookHarness(t);
+  harness.clerkUsers.set('user_123', clerkUser({ emailAddresses: [] }));
+  const missingEmail = await harness.post(event('user.created'));
+  assert.equal(missingEmail.status, 200);
+  assert.deepEqual(await missingEmail.json(), { status: 'incomplete' });
   assert.equal(harness.users.users.size, 0);
+  assert.equal(harness.users.calls.at(-1).options.upsert, false);
 
   harness.clerkUsers.set('user_123', clerkUser());
   await harness.post(event('user.updated'));
-  harness.clerkUsers.set('user_123', clerkUser({ phoneNumbers: [] }));
-  await harness.post(event('user.updated'));
   const user = harness.users.users.get('user_123');
-  assert.equal(user.phoneNumber, '+14155552671');
-  assert.equal(user.verification.phoneVerified, false);
-
   harness.clerkUsers.set('user_123', clerkUser({ emailAddresses: [] }));
   await harness.post(event('user.updated'));
   assert.equal(user.email, 'ada@example.com');

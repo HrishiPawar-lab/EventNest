@@ -1,7 +1,14 @@
+import type { ReactNode } from 'react'
 import { LuArrowLeft, LuCalendarDays, LuShieldCheck } from 'react-icons/lu'
 import { Link } from 'react-router-dom'
 
-export function AuthShell({ children, eyebrow = 'Welcome to EventNest' }) {
+export function AuthShell({
+  children,
+  eyebrow = 'Welcome to EventNest',
+}: {
+  children: ReactNode
+  eyebrow?: string
+}) {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_8%_8%,#d5eaf0_0%,#f4f9fb_42%,#f7fafb_100%)] text-slate-900">
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-7 sm:px-8">

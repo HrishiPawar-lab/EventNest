@@ -2,6 +2,7 @@ import 'dotenv/config';
 import mongoose from 'mongoose';
 import { loadConfig } from './config.js';
 import { startServer } from './start.js';
+import { getStartupFailureMessage } from './startupError.js';
 import './models/index.js';
 
 async function start() {
@@ -30,9 +31,7 @@ async function start() {
   process.once('SIGTERM', handleSignal);
 }
 
-start().catch(() => {
-  console.error(
-    'EventNest API failed to start. Check configuration and MongoDB availability.',
-  );
+start().catch((error) => {
+  console.error(getStartupFailureMessage(error));
   process.exitCode = 1;
 });

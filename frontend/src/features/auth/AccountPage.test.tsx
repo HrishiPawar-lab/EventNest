@@ -31,6 +31,18 @@ describe('account session controls', () => {
     expect(sessionStorage.length).toBe(0)
   })
 
+  it('offers optional phone verification when no phone is present', () => {
+    render(
+      <MemoryRouter>
+        <AccountPage />
+      </MemoryRouter>,
+    )
+    expect(screen.getByText('Phone not added (optional)')).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Add a phone number' }).getAttribute('href')).toBe(
+      '/verify-phone',
+    )
+  })
+
   it('shows a recoverable error when Clerk sign-out fails', async () => {
     clerkState.signOut.mockRejectedValue(new Error('Offline'))
     render(
@@ -42,6 +54,8 @@ describe('account session controls', () => {
     await waitFor(() =>
       expect(screen.getByRole('alert').textContent).toContain('Could not sign out'),
     )
-    expect(screen.getByRole('button', { name: 'Sign out' }).disabled).toBe(false)
+    expect((screen.getByRole('button', { name: 'Sign out' }) as HTMLButtonElement).disabled).toBe(
+      false,
+    )
   })
 })

@@ -114,9 +114,11 @@ User identity and authentication
   roles and state.
 - Never store passwords, OAuth access tokens, refresh tokens, or Clerk
   secrets in MongoDB.
-- Every account must have a verified email and a verified phone number
-  under the current v1 authentication design.
-- Phone numbers must use E.164 format.
+- Every account must have a verified email under the current v1
+  authentication design. A phone number is optional and must not block
+  account access.
+- Phone numbers must use E.164 format when provided. An unverified phone
+  number must not be treated as a verified contact.
 - Normalize email addresses to lowercase.
 - A user may have both attendee and organizer roles.
 - Never trust a client-supplied user ID for authorization. Derive

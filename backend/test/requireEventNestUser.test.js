@@ -108,10 +108,25 @@ test('suspended and deactivated users return 403', async (t) => {
   }
 });
 
-test('email and phone must both be verified', async (t) => {
+test('verified email grants access with no phone or an unverified phone', async (t) => {
+  for (const verification of [
+    { emailVerified: true, phoneVerified: false },
+    { emailVerified: true },
+  ]) {
+    const harness = await authHarness(t, {
+      auth: { isAuthenticated: true, userId: 'user_123' },
+      user: { ...verifiedUser, verification },
+    });
+    const response = await harness.request();
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { userId: 'local-user-id' });
+  }
+});
+
+test('unverified email still denies access', async (t) => {
   for (const verification of [
     { emailVerified: false, phoneVerified: true },
-    { emailVerified: true, phoneVerified: false },
+    { emailVerified: false, phoneVerified: false },
     undefined,
   ]) {
     const harness = await authHarness(t, {

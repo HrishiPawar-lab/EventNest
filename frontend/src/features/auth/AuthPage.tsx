@@ -5,7 +5,7 @@ import { AuthShell } from './AuthShell'
 import { clerkAppearance } from './clerkAppearance'
 import { rememberDestination, safeDestination } from './returnTo'
 
-export function AuthPage({ mode }) {
+export function AuthPage({ mode }: { mode: 'sign-in' | 'sign-up' }) {
   const location = useLocation()
   const requested = new URLSearchParams(location.search).get('return_to')
 
@@ -17,7 +17,7 @@ export function AuthPage({ mode }) {
     appearance: clerkAppearance,
     routing: 'path',
     fallbackRedirectUrl: '/auth/complete',
-  }
+  } as const
 
   return (
     <AuthShell

@@ -1,17 +1,18 @@
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import type { ComponentType } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import { EmailVerificationPage } from './EmailVerificationPage'
 import { PhoneVerificationPage } from './PhoneVerificationPage'
 
-const clerkState = vi.hoisted(() => ({ user: null }))
+const clerkState = vi.hoisted((): { user: unknown } => ({ user: null }))
 vi.mock('@clerk/react', () => ({
   useUser: () => ({ user: clerkState.user }),
-  useReverification: (callback) => callback,
+  useReverification: (callback: (value: string) => Promise<unknown>) => callback,
 }))
 
-function renderPage(Page) {
+function renderPage(Page: ComponentType) {
   return render(
     <MemoryRouter>
       <Page />
@@ -108,6 +109,32 @@ describe('Clerk contact verification', () => {
     await person.type(screen.getByLabelText('Mobile number'), '+919876543210')
     await person.click(screen.getByRole('button', { name: 'Send verification code' }))
     await waitFor(() => expect(screen.getByRole('alert').textContent).toBe('Try again later'))
-    expect(screen.getByRole('button', { name: 'Send verification code' }).disabled).toBe(false)
+    expect(
+      (screen.getByRole('button', { name: 'Send verification code' }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(false)
+    expect(screen.getByRole('link', { name: 'Continue to my account' })).toBeTruthy()
+  })
+
+  it('explains unsupported SMS countries and keeps optional phone setup skippable', async () => {
+    const person = userEvent.setup()
+    clerkState.user = {
+      phoneNumbers: [],
+      primaryPhoneNumber: null,
+      createPhoneNumber: vi.fn().mockRejectedValue({
+        errors: [{ code: 'unsupported_country_code', message: 'Provider rejected the number' }],
+      }),
+    }
+    renderPage(PhoneVerificationPage)
+    await person.type(screen.getByLabelText('Mobile number'), '+919876543210')
+    await person.click(screen.getByRole('button', { name: 'Send verification code' }))
+    await waitFor(() =>
+      expect(screen.getByRole('alert').textContent).toBe(
+        'SMS verification is unavailable for this number. You can continue without adding a phone number.',
+      ),
+    )
+    expect(screen.getByRole('link', { name: 'Continue to my account' }).getAttribute('href')).toBe(
+      '/account',
+    )
   })
 })

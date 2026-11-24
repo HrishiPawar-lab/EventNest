@@ -28,7 +28,7 @@ npm ci
 npm run dev
 ```
 
-The frontend has a public discovery starter, Clerk sign-in and sign-up, mandatory email and phone verification, and a protected account placeholder. The backend exposes `GET /health`, defines the eight v1 Mongoose models, accepts verified Clerk user webhooks at `POST /api/webhooks/clerk`, and provides reusable authentication and authorization middleware. Payments, ticketing workflows, and protected attendee/organizer product routes have not been implemented yet.
+The frontend has a public discovery starter, Clerk sign-in and sign-up, required email verification, optional phone verification, and a protected account placeholder. The backend exposes `GET /health`, defines the eight v1 Mongoose models, accepts verified Clerk user webhooks at `POST /api/webhooks/clerk`, and provides reusable authentication and authorization middleware. Payments, ticketing workflows, and protected attendee/organizer product routes have not been implemented yet.
 
 ## Checks
 

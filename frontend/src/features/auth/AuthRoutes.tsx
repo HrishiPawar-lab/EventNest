@@ -1,5 +1,6 @@
 import { useAuth, useUser } from '@clerk/react'
 import { useEffect, useRef } from 'react'
+import type { ReactNode } from 'react'
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { LoadingScreen } from './LoadingScreen'
 import {
@@ -11,11 +12,15 @@ import {
   signInPathFor,
 } from './returnTo'
 
-function isVerificationRoute(pathname) {
+function isVerificationRoute(pathname: string) {
   return pathname === '/verify-email' || pathname === '/verify-phone'
 }
 
-export function OnboardingGate({ children }) {
+function isSignInOrSignUpRoute(pathname: string) {
+  return /^\/(?:sign-in|sign-up)(?:\/|$)/.test(pathname)
+}
+
+export function OnboardingGate({ children }: { children: ReactNode }) {
   const { isLoaded, isSignedIn } = useAuth()
   const { isLoaded: userLoaded, user } = useUser()
   const location = useLocation()
@@ -25,7 +30,9 @@ export function OnboardingGate({ children }) {
   const requested = new URLSearchParams(location.search).get('return_to')
   const destination = requested
     ? safeDestination(requested)
-    : isVerificationRoute(location.pathname) || location.pathname === '/auth/complete'
+    : isVerificationRoute(location.pathname) ||
+        isSignInOrSignUpRoute(location.pathname) ||
+        location.pathname === '/auth/complete'
       ? readDestination()
       : destinationFromLocation(location)
   const query = `?return_to=${encodeURIComponent(destination)}`
@@ -39,18 +46,13 @@ export function OnboardingGate({ children }) {
 
   if (!user) return <LoadingScreen />
   const emailVerified = user.primaryEmailAddress?.verification?.status === 'verified'
-  const phoneVerified = user.primaryPhoneNumber?.verification?.status === 'verified'
 
   if (!emailVerified && location.pathname !== '/verify-email') {
     return <Navigate to={`/verify-email${query}`} replace />
   }
-  if (emailVerified && !phoneVerified && location.pathname !== '/verify-phone') {
-    return <Navigate to={`/verify-phone${query}`} replace />
-  }
   if (
     emailVerified &&
-    phoneVerified &&
-    (isVerificationRoute(location.pathname) || location.pathname.startsWith('/sign-'))
+    (location.pathname === '/verify-email' || isSignInOrSignUpRoute(location.pathname))
   ) {
     return <Navigate to={`/auth/complete${query}`} replace />
   }

@@ -7,25 +7,34 @@ import { clerkErrorMessage } from './clerkErrors'
 import { ContactCollectionForm } from './ContactCollectionForm'
 import { VerificationCodeForm } from './VerificationCodeForm'
 
+type ClerkUser = NonNullable<ReturnType<typeof useUser>['user']>
+type ClerkEmail = NonNullable<ClerkUser['primaryEmailAddress']>
+
 export function EmailVerificationPage() {
   const { user } = useUser()
-  const [pendingEmail, setPendingEmail] = useState(null)
+  const [pendingEmail, setPendingEmail] = useState<ClerkEmail | null>(null)
   const [error, setError] = useState('')
   const [promoting, setPromoting] = useState(false)
-  const createEmail = useReverification((address) => user?.createEmailAddress({ email: address }))
-  const setPrimaryEmail = useReverification((id) => user?.update({ primaryEmailAddressId: id }))
+  const createEmail = useReverification((address: string) =>
+    user?.createEmailAddress({ email: address }),
+  )
+  const setPrimaryEmail = useReverification((id: string) =>
+    user?.update({ primaryEmailAddressId: id }),
+  )
   const email = pendingEmail || user?.primaryEmailAddress || user?.emailAddresses?.[0]
   const verifiedAlternate = user?.emailAddresses?.find(
     (entry) => entry.verification?.status === 'verified' && entry.id !== user.primaryEmailAddressId,
   )
 
-  async function addEmail(address) {
+  async function addEmail(address: string) {
     const created = await createEmail(address)
+    if (!created) throw new Error('Email address could not be added')
     await created.prepareVerification({ strategy: 'email_code' })
     setPendingEmail(created)
   }
 
-  async function verify(code) {
+  async function verify(code: string) {
+    if (!user || !email) throw new Error('Email address is unavailable')
     const verified = await email.attemptVerification({ code })
     if (verified.verification?.status !== 'verified')
       throw new Error('Email verification is still pending')
@@ -36,6 +45,7 @@ export function EmailVerificationPage() {
   }
 
   async function promoteExisting() {
+    if (!user || !verifiedAlternate) return
     setError('')
     setPromoting(true)
     try {
