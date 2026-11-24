@@ -1,0 +1,13 @@
+# Organizer reporting API
+
+All routes require a valid Clerk session, an active and email-verified local EventNest user, and the `organizer` role. Event-specific results are scoped to events owned by that local user. An attendee receives `403 FORBIDDEN`; an unrecognized, foreign, or malformed event returns `404 NOT_FOUND` or `400 VALIDATION_ERROR`.
+
+| Method | Route                                      | Request                                                                    | Success                                                                                                                                                           |
+| ------ | ------------------------------------------ | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/organizer/dashboard`                 | None                                                                       | `200 { "data": { "venueCount", "eventCount", "publishedCount", "soldTickets", "successfulPayments", "paidAmount" } }`                                             |
+| `GET`  | `/api/organizer/events/:eventId/analytics` | Event ObjectId                                                             | `200 { "data": { "eventId", "maxAttendees", "ticketsSold", "ticketsReserved", "available", "activeHolds", "ticketCounts", "successfulPayments", "paidAmount" } }` |
+| `GET`  | `/api/organizer/events/:eventId/attendees` | Event ObjectId; optional `page` (default 1), `limit` (default 20, max 100) | `200 { "data": [ticket], "pagination": { "page", "limit", "total" } }`                                                                                            |
+
+`ticketCounts` includes `valid`, `used`, `cancelled`, and `refunded`. `soldTickets` counts valid and used tickets. `activeHolds` counts only pending reservations whose expiry is in the future. `available` uses the event's inventory counters and may briefly lag expiration until the release worker runs. `paidAmount` sums successful payment records in the same units stored by `Payment.amount`; its display currency units and refund adjustment remain pending the payment specification. Attendee records include ticket number/status, check-in timestamps, and a minimal purchaser name/email. No Clerk ID, phone number, or payment provider identifier is returned.
+
+Missing/invalid sessions return `401 UNAUTHORIZED`; inactive/unverified accounts return `403 FORBIDDEN` or `403 VERIFICATION_REQUIRED`; invalid pagination returns `400 VALIDATION_ERROR`; unexpected failures return a generic `500 INTERNAL_ERROR`.

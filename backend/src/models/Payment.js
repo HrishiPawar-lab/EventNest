@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { isPositiveAmount } from './validators.js';
+import { isPositiveInteger } from './validators.js';
 
 const paymentSchema = new mongoose.Schema(
   {
@@ -30,18 +30,26 @@ const paymentSchema = new mongoose.Schema(
       type: Number,
       required: true,
       validate: {
-        validator: isPositiveAmount,
-        message: 'Amount must be positive',
+        validator: isPositiveInteger,
+        message: 'Amount must be a positive integer in paise',
       },
     },
     currency: { type: String, enum: ['INR'], required: true, default: 'INR' },
     status: {
       type: String,
-      enum: ['created', 'pending', 'successful', 'failed'],
+      enum: ['created', 'pending', 'successful', 'failed', 'refunded'],
       required: true,
       default: 'created',
     },
     paidAt: { type: Date },
+    refundStatus: { type: String, enum: ['pending', 'processed', 'failed'] },
+    providerRefundId: { type: String, trim: true, minlength: 1 },
+    refundReason: {
+      type: String,
+      enum: ['expired', 'duplicate', 'event_cancelled'],
+    },
+    refundAttempt: { type: Number, default: 0, min: 0 },
+    refundedAt: { type: Date },
   },
   { collection: 'payments', timestamps: true },
 );
@@ -55,6 +63,13 @@ paymentSchema.index(
   {
     unique: true,
     partialFilterExpression: { providerPaymentId: { $type: 'string' } },
+  },
+);
+paymentSchema.index(
+  { provider: 1, providerRefundId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { providerRefundId: { $type: 'string' } },
   },
 );
 

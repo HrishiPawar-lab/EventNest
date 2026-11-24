@@ -28,6 +28,7 @@ test('loads a valid MongoDB URI and default port', () => {
         webhookSigningSecret: 'whsec_test_placeholder',
       },
       cloudinary: null,
+      razorpay: null,
     },
   );
 });

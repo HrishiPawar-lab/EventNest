@@ -297,7 +297,7 @@ test('QR credential requires a token hash and allows only active or revoked stat
   );
 });
 
-test('payment supports an absent payment ID but requires order ID and positive amount', async () => {
+test('payment supports an absent payment ID but requires order ID and integer paise', async () => {
   const payment = new Payment(validPayment());
   await payment.validate();
   assert.equal(payment.provider, 'razorpay');
@@ -313,7 +313,15 @@ test('payment supports an absent payment ID but requires order ID and positive a
     new Payment({ ...validPayment(), amount: -1 }).validate(),
   );
   await assert.rejects(
-    new Payment({ ...validPayment(), status: 'refunded' }).validate(),
+    new Payment({ ...validPayment(), amount: 10.5 }).validate(),
+  );
+  await new Payment({
+    ...validPayment(),
+    status: 'refunded',
+    refundStatus: 'processed',
+  }).validate();
+  await assert.rejects(
+    new Payment({ ...validPayment(), refundStatus: 'unknown' }).validate(),
   );
 });
 
@@ -391,6 +399,16 @@ test('index blueprint includes unique and query indexes without speculative TTL'
       {
         unique: true,
         partialFilterExpression: { providerPaymentId: { $type: 'string' } },
+      },
+    ),
+  );
+  assert.ok(
+    hasIndex(
+      Payment,
+      { provider: 1, providerRefundId: 1 },
+      {
+        unique: true,
+        partialFilterExpression: { providerRefundId: { $type: 'string' } },
       },
     ),
   );

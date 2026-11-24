@@ -35,6 +35,7 @@ const ticketReservationSchema = new mongoose.Schema(
 
 ticketReservationSchema.index({ userId: 1, createdAt: -1 });
 ticketReservationSchema.index({ eventId: 1, status: 1, expiresAt: 1 });
+ticketReservationSchema.index({ status: 1, expiresAt: 1 });
 
 export const TicketReservation = mongoose.model(
   'TicketReservation',

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHmac } from 'node:crypto';
 import { after, before, test } from 'node:test';
 import { createApp } from '../src/app.js';
 
@@ -72,4 +73,39 @@ test('unsupported request encoding is rejected with a safe error', async () => {
       message: 'Unsupported request encoding',
     },
   });
+});
+
+test('Razorpay webhook receives its raw signed body before Clerk session middleware', async () => {
+  const webhookSecret = 'test-webhook-secret';
+  const paymentServer = createApp({
+    razorpayConfig: { webhookSecret },
+    paymentService: {},
+    clerkSessionMiddleware: (_request, response) => {
+      response.status(401).json({ error: { code: 'UNAUTHENTICATED' } });
+    },
+  }).listen(0);
+  await new Promise((resolve) => paymentServer.once('listening', resolve));
+  try {
+    const body = JSON.stringify({ event: 'unhandled.event' });
+    const signature = createHmac('sha256', webhookSecret)
+      .update(body)
+      .digest('hex');
+    const response = await fetch(
+      `http://127.0.0.1:${paymentServer.address().port}/api/webhooks/razorpay`,
+      {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-razorpay-signature': signature,
+        },
+        body,
+      },
+    );
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { status: 'ignored' });
+  } finally {
+    await new Promise((resolve, reject) =>
+      paymentServer.close((error) => (error ? reject(error) : resolve())),
+    );
+  }
 });

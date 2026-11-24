@@ -1,6 +1,6 @@
 # EventNest --- Database Architecture Specification
 
-**Version:** 1.2\
+**Version:** 1.4\
 **Status:** Approved baseline for v1 database implementation\
 **Database:** MongoDB\
 **ODM:** Mongoose
@@ -14,20 +14,44 @@ must use E.164 format; only a verified phone may be treated as verified.
 Cloudinary cover image. The image is represented by a paired secure delivery
 URL and Cloudinary public ID. Existing documents need no backfill.
 
+**v1.3 decision (2026-11-24):** Draft events may be published only with a
+future start, nonempty category, positive price, and an owned venue with
+sufficient capacity. Draft or published events may be cancelled only before
+ticket or payment activity; the first implementation rejects any ticket or
+payment record and any pending or confirmed reservation or nonzero inventory
+counter.
+
+**v1.4 payment decision (2026-11-24):** Paid checkout uses positive INR
+prices. `payments.amount` is stored in integer paise; `tickets.pricePaid`
+remains in INR. Captured payments for expired, cancelled, or already
+confirmed reservations are refunded in full without issuing tickets. A
+payment record tracks the provider refund ID, pending/processed/failed
+refund state, reason, and completion time. The `refunded` payment status
+applies only after Razorpay reports a processed refund. Pending refund API
+retries reuse an idempotency key derived from the payment ID and attempt
+number; a provider-confirmed failed attempt increments that number before a
+new request. Purchaser-initiated refunds remain deferred pending an approved
+eligibility policy. QR tokens are derived using a backend-only secret and a
+ticket ID, then only their hashes
+are stored; the secret must be preserved across deployments. A provider
+order created immediately before a failed local Payment write may require
+manual reconciliation because the schema requires a provider order ID in
+the initial record.
+
 ## 1. Agreed v1 constraints
 
--   In-person events only; every event has exactly one venue.
--   A venue can be reused by its owning organizer.
--   One account can be both attendee and organizer.
--   General admission only; no assigned seating.
--   One ticket type and one price per event.
--   One checkout may purchase multiple tickets; each entry becomes an
-    individual ticket document.
--   Temporary ticket holds last five minutes.
--   Inventory must be protected against concurrent bookings.
--   Basic refunds are in v1; advanced and partial refund workflows are
-    deferred.
--   QR credentials are stored separately from tickets.
+- In-person events only; every event has exactly one venue.
+- A venue can be reused by its owning organizer.
+- One account can be both attendee and organizer.
+- General admission only; no assigned seating.
+- One ticket type and one price per event.
+- One checkout may purchase multiple tickets; each entry becomes an
+  individual ticket document.
+- Temporary ticket holds last five minutes.
+- Inventory must be protected against concurrent bookings.
+- Basic refunds are in v1; advanced and partial refund workflows are
+  deferred.
+- QR credentials are stored separately from tickets.
 
 ## 2. Collections
 
@@ -37,17 +61,17 @@ The eight collections are `users`, `venues`, `events`,
 
 ## 3. Relationships
 
--   One user owns many venues and organizes many events.
--   One venue hosts many events.
--   One user creates many reservations and purchases many tickets.
--   One event has many reservations, tickets, payments, and wishlist
-    entries.
--   One reservation can have multiple payment attempts and generate
-    multiple tickets.
--   Each ticket has exactly one QR credential.
--   Users and events have a many-to-many relationship through wishlists.
+- One user owns many venues and organizes many events.
+- One venue hosts many events.
+- One user creates many reservations and purchases many tickets.
+- One event has many reservations, tickets, payments, and wishlist
+  entries.
+- One reservation can have multiple payment attempts and generate
+  multiple tickets.
+- Each ticket has exactly one QR credential.
+- Users and events have a many-to-many relationship through wishlists.
 
-``` mermaid
+```mermaid
 erDiagram
     USERS ||--o{ VENUES : owns
     USERS ||--o{ EVENTS : organizes
@@ -75,7 +99,7 @@ seed data.
 
 Application profile; Clerk remains the identity provider.
 
-``` javascript
+```javascript
 {
   _id: ObjectId,
   clerkId: String,             // Unique Clerk user ID
@@ -106,7 +130,7 @@ Rules:
 
 Reusable physical venues owned by organizers.
 
-``` javascript
+```javascript
 {
   _id: ObjectId,
   organizerId: ObjectId,       // users._id
@@ -141,7 +165,7 @@ either field remains valid.
 Event details, venue association, discovery location, and inventory
 counters.
 
-``` javascript
+```javascript
 {
   _id: ObjectId,
   organizerId: ObjectId,       // users._id
@@ -177,6 +201,20 @@ for direct city discovery. The venue remains the source of truth.
 Changing an event's venue must also update its copied location
 consistently.
 
+Publishing changes only a draft to published after checking future start,
+nonempty category, positive price, organizer ownership of the venue, and
+venue capacity. Cancellation changes only a draft or published event to
+cancelled and is blocked while sold or reserved inventory, a pending or
+confirmed reservation, or any ticket or payment record exists. This conservative rule keeps the
+current API from stranding purchases until payment and refund workflows are
+specified. These transitions must run in transactions and coordinate with
+reservation and payment writes on the Event document.
+
+`ticketPrice` is an INR unit amount that must represent whole paise. Drafts
+may be free, but publishing requires a positive price. The API validates
+new and edited prices; publication rechecks older drafts so payment order
+creation cannot encounter an unsupported fractional price.
+
 The cover image fields must be set or removed together. An event without
 either field remains valid. The model validates HTTPS delivery URLs and
 nonempty public IDs; a future authenticated upload and CRUD service must
@@ -192,7 +230,7 @@ document validation middleware does not guard `updateOne` or
 Temporarily holds a quantity of general-admission inventory during
 checkout.
 
-``` javascript
+```javascript
 {
   _id: ObjectId,
   userId: ObjectId,            // users._id
@@ -220,7 +258,7 @@ it for exact expiry timing.
 
 One document per purchased entry.
 
-``` javascript
+```javascript
 {
   _id: ObjectId,
   eventId: ObjectId,           // events._id
@@ -248,7 +286,7 @@ provide basic check-in metadata.
 
 Separate opaque QR credential for each ticket.
 
-``` javascript
+```javascript
 {
   _id: ObjectId,
   ticketId: ObjectId,          // Unique tickets reference
@@ -267,7 +305,7 @@ information. - Store the hash, not the raw token.
 
 One document per payment attempt/order.
 
-``` javascript
+```javascript
 {
   _id: ObjectId,
   userId: ObjectId,            // users._id
@@ -276,10 +314,15 @@ One document per payment attempt/order.
   provider: String,            // razorpay
   providerOrderId: String,
   providerPaymentId: String,   // May be absent until available
-  amount: Number,
+  amount: Number,              // Positive integer INR paise
   currency: String,            // INR
-  status: String,              // created, pending, successful, failed
+  status: String,              // created, pending, successful, failed, refunded
   paidAt: Date,
+  refundStatus: String,        // Optional: pending, processed, failed
+  providerRefundId: String,    // Optional until Razorpay returns an ID
+  refundReason: String,        // expired, duplicate, event_cancelled
+  refundAttempt: Number,       // Stable retry key version; default 0
+  refundedAt: Date,
   createdAt: Date,
   updatedAt: Date
 }
@@ -293,15 +336,14 @@ unique per provider. - Provider payment IDs are unique per provider when
 present; use a partial unique index. - Verify outcomes on the backend.
 Never trust frontend success claims. - Webhook processing must be
 idempotent. - Never store card numbers, CVV, or payment credentials. -
-Basic refunds are in v1. Detailed refund states and workflows are
-finalized in the payment feature specification; do not invent them
-during schema scaffolding.
+Basic full refunds are in v1. The payment workflow records provider-confirmed
+refund states. Partial refunds are deferred.
 
 ### 4.8 `wishlists`
 
 Events saved by users.
 
-``` javascript
+```javascript
 {
   _id: ObjectId,
   userId: ObjectId,            // users._id
@@ -319,67 +361,70 @@ These indexes reflect known relationships and expected queries. Validate
 them as features are implemented; do not add speculative indexes without
 a query-based reason.
 
-  -------------------------------------------------------------------------------------------------
-  Collection              Index                                             Purpose
-  ----------------------- ------------------------------------------------- -----------------------
-  users                   `{ clerkId: 1 }` unique                           Clerk-to-user lookup
+---
 
-  users                   `{ email: 1 }` unique                             Unique normalized email
+Collection Index Purpose
 
-  users                   `{ phoneNumber: 1 }` unique partial               Unique phone when present
+---
 
-  venues                  `{ organizerId: 1 }`                              Organizer's venues
+users `{ clerkId: 1 }` unique Clerk-to-user lookup
 
-  venues                  `{ address.city: 1 }`                             City filtering
+users `{ email: 1 }` unique Unique normalized email
 
-  venues                  `{ location: "2dsphere" }`                        Geospatial discovery
+users `{ phoneNumber: 1 }` unique partial Unique phone when present
 
-  events                  `{ organizerId: 1, createdAt: -1 }`               Organizer's events
+venues `{ organizerId: 1 }` Organizer's venues
 
-  events                  `{ venueId: 1 }`                                  Events at a venue
+venues `{ address.city: 1 }` City filtering
 
-  events                  `{ status: 1, startDate: 1 }`                     Upcoming/status queries
+venues `{ location: "2dsphere" }` Geospatial discovery
 
-  events                  `{ location.city: 1, status: 1, startDate: 1 }`   City event discovery
+events `{ organizerId: 1, createdAt: -1 }` Organizer's events
 
-  ticketReservations      `{ userId: 1, createdAt: -1 }`                    User reservation
-                                                                            history
+events `{ venueId: 1 }` Events at a venue
 
-  ticketReservations      `{ eventId: 1, status: 1, expiresAt: 1 }`         Event holds
+events `{ status: 1, startDate: 1 }` Upcoming/status queries
 
-  ticketReservations      `{ cleanupAt: 1 }` TTL, only if cleanup policy is Eventual cleanup
-                          enabled
+events `{ location.city: 1, status: 1, startDate: 1 }` City event discovery
 
-  tickets                 `{ ticketNumber: 1 }` unique                      Ticket lookup
+ticketReservations `{ userId: 1, createdAt: -1 }` User reservation
+history
 
-  tickets                 `{ userId: 1, createdAt: -1 }`                    User tickets
+ticketReservations `{ eventId: 1, status: 1, expiresAt: 1 }` Event holds
 
-  tickets                 `{ eventId: 1, status: 1 }`                       Event ticket queries
+ticketReservations `{ cleanupAt: 1 }` TTL, only if cleanup policy is Eventual cleanup
+enabled
 
-  tickets                 `{ reservationId: 1 }`                            Tickets for reservation
+tickets `{ ticketNumber: 1 }` unique Ticket lookup
 
-  qrCredentials           `{ ticketId: 1 }` unique                          One credential per
-                                                                            ticket
+tickets `{ userId: 1, createdAt: -1 }` User tickets
 
-  qrCredentials           `{ tokenHash: 1 }` unique                         Credential lookup
+tickets `{ eventId: 1, status: 1 }` Event ticket queries
 
-  payments                `{ userId: 1, createdAt: -1 }`                    User payment history
+tickets `{ reservationId: 1 }` Tickets for reservation
 
-  payments                `{ eventId: 1, status: 1 }`                       Event payment reporting
+qrCredentials `{ ticketId: 1 }` unique One credential per
+ticket
 
-  payments                `{ reservationId: 1 }`                            Attempts per
-                                                                            reservation
+qrCredentials `{ tokenHash: 1 }` unique Credential lookup
 
-  payments                `{ provider: 1, providerOrderId: 1 }` unique      Provider order lookup
+payments `{ userId: 1, createdAt: -1 }` User payment history
 
-  payments                `{ provider: 1, providerPaymentId: 1 }` unique,   Provider payment lookup
-                          partial when present
+payments `{ eventId: 1, status: 1 }` Event payment reporting
 
-  wishlists               `{ userId: 1, eventId: 1 }` unique                Prevent duplicate saves
+payments `{ reservationId: 1 }` Attempts per
+reservation
 
-  wishlists               `{ eventId: 1 }` optional                         Find users who saved an
-                                                                            event, if needed
-  -------------------------------------------------------------------------------------------------
+payments `{ provider: 1, providerOrderId: 1 }` unique Provider order lookup
+
+payments `{ provider: 1, providerPaymentId: 1 }` unique, Provider payment lookup
+partial when present
+
+wishlists `{ userId: 1, eventId: 1 }` unique Prevent duplicate saves
+
+wishlists `{ eventId: 1 }` optional Find users who saved an
+event, if needed
+-------------------------------------------------------------------------------------------------
 
 Index notes:
 
@@ -435,30 +480,30 @@ ask before making an architectural or product decision.
 
 ## 8. Decisions deferred to feature specifications
 
--   Event category list and publishing rules.
--   Reservation expiry worker/scheduler and recovery strategy.
--   Payment success arriving after reservation expiry.
--   Razorpay retries, webhook idempotency details, and refund lifecycle.
--   Reservation cleanup retention duration.
--   Staff/door permissions for check-in.
--   Exact API contracts and query patterns.
--   Additional indexes justified by real queries.
+- Event category list beyond the nonempty publication requirement.
+- Reservation expiry worker/scheduler and recovery strategy.
+- Payment success arriving after reservation expiry.
+- Razorpay retries, webhook idempotency details, and refund lifecycle.
+- Reservation cleanup retention duration.
+- Staff/door permissions for check-in.
+- Exact API contracts and query patterns.
+- Additional indexes justified by real queries.
 
 ## 9. Database foundation acceptance criteria
 
--   Backend connects to MongoDB through environment configuration.
--   All eight Mongoose models compile and register.
--   Schema fields, references, required fields, enums, defaults, and
-    validation match this specification.
--   Required indexes are correctly defined.
--   No TTL index is created on reservation `expiresAt`.
--   Optional provider IDs use safe uniqueness handling.
--   Schema validation tests cover representative valid and invalid
-    documents.
--   No business workflows or unrelated features are implemented.
--   Setup and test instructions are documented.
--   Completion report lists changed files, dependencies, checks run, and
-    unresolved issues.
+- Backend connects to MongoDB through environment configuration.
+- All eight Mongoose models compile and register.
+- Schema fields, references, required fields, enums, defaults, and
+  validation match this specification.
+- Required indexes are correctly defined.
+- No TTL index is created on reservation `expiresAt`.
+- Optional provider IDs use safe uniqueness handling.
+- Schema validation tests cover representative valid and invalid
+  documents.
+- No business workflows or unrelated features are implemented.
+- Setup and test instructions are documented.
+- Completion report lists changed files, dependencies, checks run, and
+  unresolved issues.
 
 **This document is the approved baseline for the EventNest v1 database
 layer. Material deviations require explicit discussion and approval

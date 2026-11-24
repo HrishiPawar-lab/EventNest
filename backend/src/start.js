@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { clerkMiddleware, createClerkClient } from '@clerk/express';
 import { createApp } from './app.js';
 import { configureCloudinary } from './config/cloudinary.js';
+import { startReservationExpiryWorker } from './features/reservations/worker.js';
 
 export async function startServer(
   config,
@@ -11,6 +12,7 @@ export async function startServer(
     disconnect = () => mongoose.disconnect(),
     makeClerkMiddleware = clerkMiddleware,
     configureMedia = configureCloudinary,
+    startExpiryWorker = startReservationExpiryWorker,
   } = {},
 ) {
   if (config.cloudinary) configureMedia(config.cloudinary);
@@ -30,6 +32,8 @@ export async function startServer(
               clerkClient,
             })
           : undefined,
+        mediaConfigured: Boolean(config.cloudinary),
+        razorpayConfig: config.razorpay,
       }).listen(config.port);
       const onError = (error) => {
         server.off('listening', onListening);
@@ -37,6 +41,8 @@ export async function startServer(
       };
       const onListening = () => {
         server.off('error', onError);
+        const stopExpiryWorker = startExpiryWorker();
+        server.once('close', stopExpiryWorker);
         resolve(server);
       };
       server.once('listening', onListening);
