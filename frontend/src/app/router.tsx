@@ -99,6 +99,16 @@ const OrganizerLiveEventForm = lazy(() =>
     default: module.OrganizerLiveEventForm,
   })),
 )
+const OrganizerLiveVenuesPage = lazy(() =>
+  import('../features/organizer/OrganizerLiveVenuesPage').then((module) => ({
+    default: module.OrganizerLiveVenuesPage,
+  })),
+)
+const OrganizerLiveVenueForm = lazy(() =>
+  import('../features/organizer/OrganizerLiveVenuesPage').then((module) => ({
+    default: module.OrganizerLiveVenueForm,
+  })),
+)
 const EventFormPage = lazy(() =>
   import('../features/organizer/OrganizerEventPages').then((module) => ({
     default: module.EventFormPage,
@@ -166,6 +176,9 @@ export function AppRoutes() {
           <Route path="/organizer/events/new" element={<OrganizerLiveEventForm />} />
           <Route path="/organizer/events/:eventId/edit" element={<OrganizerLiveEventForm />} />
           <Route path="/organizer/events/:eventId" element={<OrganizerLiveEventDetailPage />} />
+          <Route path="/organizer/venues" element={<OrganizerLiveVenuesPage />} />
+          <Route path="/organizer/venues/new" element={<OrganizerLiveVenueForm />} />
+          <Route path="/organizer/venues/:venueId/edit" element={<OrganizerLiveVenueForm />} />
           <Route path="/organizer/preview/events" element={<OrganizerEventsPage />} />
           <Route path="/organizer/preview/events/new" element={<EventFormPage />} />
           <Route path="/organizer/preview/events/:eventId/edit" element={<EventFormPage />} />

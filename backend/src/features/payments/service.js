@@ -331,11 +331,20 @@ export function createPaymentService({
           reservation.expiresAt > at &&
           event.status === 'published' &&
           event.startDate > at;
+        const ownedTicket = active
+          ? await ticketModel
+              .exists({
+                userId: current.userId,
+                eventId: current.eventId,
+                status: { $in: ['valid', 'used'] },
+              })
+              .session(session)
+          : false;
         const update = { providerPaymentId, status: 'successful', paidAt: at };
-        if (!active) {
+        if (!active || ownedTicket) {
           update.refundStatus = 'pending';
           update.refundReason =
-            reservation.status === 'confirmed'
+            ownedTicket || reservation.status === 'confirmed'
               ? 'duplicate'
               : event.status !== 'published'
                 ? 'event_cancelled'
@@ -352,6 +361,29 @@ export function createPaymentService({
             );
             if (expired.modifiedCount !== 1)
               throw new Error('Reservation expiry conflict');
+            const released = await eventModel.updateOne(
+              {
+                _id: event._id,
+                ticketsReserved: { $gte: reservation.quantity },
+              },
+              { $inc: { ticketsReserved: -reservation.quantity } },
+              { session },
+            );
+            if (released.modifiedCount !== 1)
+              throw new Error('Reservation inventory invariant failed');
+          }
+          if (ownedTicket) {
+            const cancelled = await reservationModel.updateOne(
+              {
+                _id: reservation._id,
+                status: 'pending',
+                expiresAt: { $gt: at },
+              },
+              { $set: { status: 'cancelled' } },
+              { session },
+            );
+            if (cancelled.modifiedCount !== 1)
+              throw new Error('Duplicate reservation cancellation conflict');
             const released = await eventModel.updateOne(
               {
                 _id: event._id,
@@ -415,7 +447,7 @@ export function createPaymentService({
           { session },
         );
         return {
-          status: active ? 'confirmed' : 'refund_pending',
+          status: active && !ownedTicket ? 'confirmed' : 'refund_pending',
           paymentId: current._id,
         };
       });

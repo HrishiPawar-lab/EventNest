@@ -9,9 +9,15 @@ const eventId = new mongoose.Types.ObjectId().toString();
 
 async function harness(
   t,
-  { authenticated = true, roles = ['organizer'] } = {},
+  {
+    authenticated = true,
+    roles = ['organizer'],
+    accountStatus = 'active',
+    emailVerified = true,
+  } = {},
 ) {
   const calls = [];
+  let currentRoles = [...roles];
   const organizerService = {
     async dashboard(id) {
       calls.push(['dashboard', id]);
@@ -36,10 +42,16 @@ async function harness(
       async findOne() {
         return {
           _id: organizerId,
-          roles,
-          accountStatus: 'active',
-          verification: { emailVerified: true },
+          roles: currentRoles,
+          accountStatus,
+          verification: { emailVerified },
         };
+      },
+      async findOneAndUpdate(filter, update) {
+        calls.push(['activate', filter, update]);
+        if (!currentRoles.includes(update.$addToSet.roles))
+          currentRoles = [...currentRoles, update.$addToSet.roles];
+        return { roles: currentRoles };
       },
     },
   });
@@ -53,10 +65,51 @@ async function harness(
   );
   return {
     calls,
-    request: (path) =>
-      fetch(`http://127.0.0.1:${server.address().port}${path}`),
+    request: (path, options) =>
+      fetch(`http://127.0.0.1:${server.address().port}${path}`, options),
   };
 }
+
+test('verified attendee can activate organizer access and retry safely', async (t) => {
+  const app = await harness(t, { roles: ['attendee'] });
+  const options = {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: '{}',
+  };
+  const first = await app.request('/api/organizer/activate', options);
+  assert.equal(first.status, 200);
+  assert.deepEqual((await first.json()).data.roles, ['attendee', 'organizer']);
+  assert.equal(
+    (await app.request('/api/organizer/activate', options)).status,
+    200,
+  );
+  assert.equal((await app.request('/api/organizer/dashboard')).status, 200);
+  assert.equal(
+    (
+      await app.request('/api/organizer/activate', {
+        ...options,
+        body: JSON.stringify({ organizerId: 'forged' }),
+      })
+    ).status,
+    400,
+  );
+  const guest = await harness(t, { authenticated: false });
+  assert.equal(
+    (await guest.request('/api/organizer/activate', options)).status,
+    401,
+  );
+  const suspended = await harness(t, { accountStatus: 'suspended' });
+  assert.equal(
+    (await suspended.request('/api/organizer/activate', options)).status,
+    403,
+  );
+  const unverified = await harness(t, { emailVerified: false });
+  assert.equal(
+    (await unverified.request('/api/organizer/activate', options)).status,
+    403,
+  );
+});
 
 test('organizer reporting routes require active organizer and derive identity', async (t) => {
   const owner = await harness(t);

@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { LuArrowLeft } from 'react-icons/lu'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { z } from 'zod'
@@ -101,15 +101,34 @@ export function OrganizerLiveEventForm() {
     register,
     handleSubmit,
     reset,
+    control,
+    trigger,
     formState: { errors, isSubmitting },
   } = useForm<EventValues>({
     resolver: zodResolver(eventSchema),
     defaultValues: defaults,
+    mode: 'onChange',
+    reValidateMode: 'onChange',
   })
+  const [selectedVenueId, selectedCapacity, startDate, endDate] = useWatch({
+    control,
+    name: ['venueId', 'maxAttendees', 'startDate', 'endDate'],
+  })
+  const venueCapacity = venues.data?.data.find((venue) => venue._id === selectedVenueId)?.capacity
+  const capacityError =
+    venueCapacity !== undefined &&
+    /^\d+$/.test(selectedCapacity) &&
+    Number(selectedCapacity) > venueCapacity
+      ? `Capacity cannot exceed this venue's limit of ${venueCapacity}.`
+      : undefined
 
   useEffect(() => {
     if (event.data) reset(eventValues(event.data))
   }, [event.data, reset])
+
+  useEffect(() => {
+    if (startDate && endDate) void trigger('endDate')
+  }, [startDate, endDate, trigger])
 
   async function submit(values: EventValues) {
     setError('')
@@ -193,8 +212,10 @@ export function OrganizerLiveEventForm() {
         )}
         {venues.isSuccess && venues.data.data.length === 0 && (
           <p role="status" className="rounded-xl border border-stone-200 bg-white p-6">
-            You need an organizer-owned venue before creating an event. Venue creation is not yet
-            connected in this app.
+            You need an organizer-owned venue before creating an event.{' '}
+            <Link to="/organizer/venues/new" className="font-medium text-brand underline">
+              Create a venue
+            </Link>
           </p>
         )}
         {venues.isSuccess &&
@@ -236,8 +257,14 @@ export function OrganizerLiveEventForm() {
                 <Field label="Ticket price (₹)" error={errors.ticketPrice?.message}>
                   <Input type="number" min="0" step="0.01" {...register('ticketPrice')} />
                 </Field>
-                <Field label="Capacity" error={errors.maxAttendees?.message}>
-                  <Input type="number" min="1" step="1" {...register('maxAttendees')} />
+                <Field label="Capacity" error={errors.maxAttendees?.message ?? capacityError}>
+                  <Input
+                    type="number"
+                    min="1"
+                    step="1"
+                    aria-invalid={Boolean(errors.maxAttendees || capacityError)}
+                    {...register('maxAttendees')}
+                  />
                 </Field>
                 <div className="sm:col-span-2">
                   <Field label="Description" error={errors.description?.message}>
@@ -286,7 +313,7 @@ export function OrganizerLiveEventForm() {
                 </p>
               )}
               <div className="flex items-center gap-3 border-t border-stone-100 pt-5">
-                <Button type="submit" disabled={isSubmitting}>
+                <Button type="submit" disabled={isSubmitting || Boolean(capacityError)}>
                   {isSubmitting ? 'Saving...' : editing || savedId ? 'Save draft' : 'Create draft'}
                 </Button>
                 <span className="text-xs text-stone-500">Only you can see a draft.</span>

@@ -41,6 +41,7 @@ const ticketSchema = new mongoose.Schema(
 
 ticketSchema.index({ ticketNumber: 1 }, { unique: true });
 ticketSchema.index({ userId: 1, createdAt: -1 });
+ticketSchema.index({ userId: 1, eventId: 1, status: 1 });
 ticketSchema.index({ eventId: 1, status: 1 });
 ticketSchema.index({ reservationId: 1 });
 

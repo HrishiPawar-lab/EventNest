@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useAuth, useUser } from '@clerk/react'
 import { usePrivateApi, usePrivateApiPage } from '../../lib/api'
 
 export type Ticket = {
@@ -24,6 +25,25 @@ export const ticketKeys = {
   list: (page: number) => ['tickets', 'list', page] as const,
   detail: (id: string) => ['tickets', 'detail', id] as const,
   qr: (id: string) => ['tickets', 'qr', id] as const,
+  ownership: (userId: string, eventId: string) =>
+    ['tickets', 'ownership', userId, eventId] as const,
+}
+
+export function useOwnsEventTicket(eventId: string | undefined) {
+  const api = usePrivateApi()
+  const { isLoaded, isSignedIn } = useAuth()
+  const { user } = useUser()
+  return useQuery({
+    queryKey: ticketKeys.ownership(user?.id ?? '', eventId ?? ''),
+    queryFn: ({ signal }) =>
+      api<{ owned: boolean }>(
+        `/api/tickets/ownership?eventId=${encodeURIComponent(eventId ?? '')}`,
+        { signal },
+      ),
+    enabled: Boolean(isLoaded && isSignedIn && user?.id && eventId),
+    staleTime: 15_000,
+    retry: false,
+  })
 }
 
 export function useTickets(page = 1) {

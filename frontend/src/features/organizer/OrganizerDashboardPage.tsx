@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Button } from '../../components/ui/button'
 import { eventDate, sampleEvents } from '../events/catalog'
 import { OrganizerHeading, OrganizerShell } from './OrganizerShell'
+import { useOrganizerAccess } from './api'
 
 const stats = [
   { label: 'Tickets sold', value: '1,240', icon: LuTicket },
@@ -12,6 +13,8 @@ const stats = [
 const bars = [34, 44, 51, 47, 62, 58, 72, 67, 84, 76, 93, 88]
 
 export function OrganizerDashboardPage() {
+  const access = useOrganizerAccess()
+  const canManage = access.isSuccess
   return (
     <OrganizerShell>
       <main className="mx-auto max-w-[1280px] px-4 py-7 sm:px-6 lg:px-8">
@@ -21,7 +24,7 @@ export function OrganizerDashboardPage() {
           description="A look at how your events and audience will come together."
           action={
             <Button asChild>
-              <Link to="/organizer/preview/events/new">
+              <Link to={canManage ? '/organizer/events/new' : '/become-organizer'}>
                 Plan an event <LuArrowRight aria-hidden="true" />
               </Link>
             </Button>
@@ -111,8 +114,9 @@ export function OrganizerDashboardPage() {
             </p>
           </div>
           <Button asChild>
-            <Link to="/organizer/preview/venues/new">
-              Preview venue form <LuArrowRight aria-hidden="true" />
+            <Link to={canManage ? '/organizer/venues/new' : '/become-organizer'}>
+              {canManage ? 'Create venue' : 'Become an organizer'}{' '}
+              <LuArrowRight aria-hidden="true" />
             </Link>
           </Button>
         </div>

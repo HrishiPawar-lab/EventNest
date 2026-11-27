@@ -46,7 +46,9 @@ the initial record.
 - General admission only; no assigned seating.
 - One ticket type and one price per event.
 - One checkout may purchase multiple tickets; each entry becomes an
-  individual ticket document.
+  individual ticket document. A purchaser may complete one active purchase per
+  event; existing valid or used tickets prevent another reservation. All
+  refunded or cancelled tickets permit a new purchase.
 - Temporary ticket holds last five minutes.
 - Inventory must be protected against concurrent bookings.
 - Basic refunds are in v1; advanced and partial refund workflows are

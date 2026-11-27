@@ -18,6 +18,10 @@ async function harness(t, authenticated = true) {
       calls.push(['get', id, resourceId]);
       return { _id: resourceId, status: 'valid' };
     },
+    async ownsEvent(id, resourceId) {
+      calls.push(['ownsEvent', id, resourceId]);
+      return true;
+    },
     async history(id, query) {
       calls.push(['history', id, query]);
       return { items: [], ...query, total: 0 };
@@ -59,10 +63,15 @@ test('ticket and booking history routes are private and paginated', async (t) =>
   const user = await harness(t);
   assert.equal((await user.request('/api/tickets?page=2&limit=5')).status, 200);
   assert.equal((await user.request(`/api/tickets/${ticketId}`)).status, 200);
+  const ownership = await user.request(
+    `/api/tickets/ownership?eventId=${ticketId}`,
+  );
+  assert.equal(ownership.status, 200);
+  assert.deepEqual((await ownership.json()).data, { owned: true });
   assert.equal((await user.request('/api/bookings')).status, 200);
   assert.deepEqual(
     user.calls.map((call) => call[0]),
-    ['list', 'get', 'history'],
+    ['list', 'get', 'ownsEvent', 'history'],
   );
   assert.equal(String(user.calls[0][1]), String(userId));
   assert.equal((await user.request('/api/tickets?limit=1000')).status, 400);
@@ -70,6 +79,27 @@ test('ticket and booking history routes are private and paginated', async (t) =>
   assert.equal((await guest.request('/api/tickets')).status, 401);
   assert.equal((await guest.request('/api/bookings')).status, 401);
   assert.equal(guest.calls.length, 0);
+});
+
+test('ownership lookup validates event ID and limits query to active owned tickets', async () => {
+  let filter;
+  const service = createTicketService({
+    ticketModel: {
+      async exists(value) {
+        filter = value;
+        return true;
+      },
+    },
+  });
+  await assert.rejects(() => service.ownsEvent(userId, 'bad-id'), {
+    status: 400,
+  });
+  assert.equal(await service.ownsEvent(userId, ticketId), true);
+  assert.deepEqual(filter, {
+    userId,
+    eventId: ticketId,
+    status: { $in: ['valid', 'used'] },
+  });
 });
 
 test('ticket service rejects invalid and foreign ticket IDs', async () => {

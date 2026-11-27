@@ -12,12 +12,28 @@ function assertTicketId(id) {
   }
 }
 
+function assertEventId(id) {
+  if (!mongoose.isObjectIdOrHexString(id)) {
+    throw new ApiError(400, 'VALIDATION_ERROR', 'Invalid event ID');
+  }
+}
+
 export function createTicketService({
   ticketModel = Ticket,
   reservationModel = TicketReservation,
   paymentModel = Payment,
 } = {}) {
   return {
+    async ownsEvent(userId, eventId) {
+      assertEventId(eventId);
+      return Boolean(
+        await ticketModel.exists({
+          userId,
+          eventId,
+          status: { $in: ['valid', 'used'] },
+        }),
+      );
+    },
     async list(userId, { page, limit }) {
       const filter = { userId };
       const [items, total] = await Promise.all([

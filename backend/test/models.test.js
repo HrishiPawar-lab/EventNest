@@ -382,6 +382,7 @@ test('index blueprint includes unique and query indexes without speculative TTL'
   );
   assert.ok(hasIndex(Ticket, { ticketNumber: 1 }, { unique: true }));
   assert.ok(hasIndex(Ticket, { userId: 1, createdAt: -1 }));
+  assert.ok(hasIndex(Ticket, { userId: 1, eventId: 1, status: 1 }));
   assert.ok(hasIndex(Ticket, { eventId: 1, status: 1 }));
   assert.ok(hasIndex(Ticket, { reservationId: 1 }));
   assert.ok(hasIndex(QRCredential, { ticketId: 1 }, { unique: true }));

@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { ApiError } from '../../apiError.js';
 import { Event } from '../../models/Event.js';
 import { TicketReservation } from '../../models/TicketReservation.js';
+import { Ticket } from '../../models/Ticket.js';
 
 const HOLD_DURATION_MS = 5 * 60 * 1000;
 
@@ -21,6 +22,7 @@ async function expiredForEvent(reservationModel, eventId, now, session) {
 export function createReservationService({
   reservationModel = TicketReservation,
   eventModel = Event,
+  ticketModel = Ticket,
   runTransaction = (operation) => mongoose.connection.transaction(operation),
   now = () => new Date(),
 } = {}) {
@@ -127,6 +129,16 @@ export function createReservationService({
             409,
             'SOLD_OUT',
             'Requested tickets are unavailable',
+          );
+        }
+        const ownedTicket = await ticketModel
+          .exists({ userId, eventId, status: { $in: ['valid', 'used'] } })
+          .session(session);
+        if (ownedTicket) {
+          throw new ApiError(
+            409,
+            'ALREADY_PURCHASED',
+            'You already have tickets for this event',
           );
         }
         const reservation = new reservationModel({

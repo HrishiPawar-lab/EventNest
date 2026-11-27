@@ -105,6 +105,7 @@ function makeService({
   reserved = 0,
   expired = [],
   ticketPrice = 500,
+  ownedTickets = [],
 } = {}) {
   const state = { capacity, sold, reserved, expired, reservations: [] };
   const eventModel = {
@@ -175,11 +176,50 @@ function makeService({
   const service = createReservationService({
     reservationModel: Reservation,
     eventModel,
+    ticketModel: {
+      exists(filter) {
+        return {
+          session: async () =>
+            ownedTickets.some(
+              (ticket) =>
+                String(ticket.userId) === String(filter.userId) &&
+                String(ticket.eventId) === String(filter.eventId) &&
+                filter.status.$in.includes(ticket.status),
+            ),
+        };
+      },
+    },
     runTransaction: async (operation) => operation({}),
     now: () => at,
   });
   return { service, state };
 }
+
+test('owned valid or used tickets prevent a second reservation', async () => {
+  for (const status of ['valid', 'used']) {
+    const { service, state } = makeService({
+      ownedTickets: [{ userId, eventId, status }],
+    });
+    await assert.rejects(
+      () => service.create(userId, { eventId, quantity: 1 }),
+      {
+        status: 409,
+        code: 'ALREADY_PURCHASED',
+      },
+    );
+    assert.equal(state.reservations.length, 0);
+  }
+});
+
+test('refunded or cancelled tickets permit a new purchase', async () => {
+  for (const status of ['refunded', 'cancelled']) {
+    const { service, state } = makeService({
+      ownedTickets: [{ userId, eventId, status }],
+    });
+    await service.create(userId, { eventId, quantity: 1 });
+    assert.equal(state.reservations.length, 1);
+  }
+});
 
 test('atomic capacity predicate prevents concurrent oversell and holds last five minutes', async () => {
   const { service, state } = makeService({ capacity: 3 });

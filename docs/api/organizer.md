@@ -1,4 +1,8 @@
-# Organizer reporting API
+# Organizer API
+
+`POST /api/organizer/activate` lets an active, email-verified EventNest user add the `organizer` role to the same account. The request body must be empty JSON. It is idempotent and returns `200 { "data": { "roles": ["attendee", "organizer"] } }` for a typical attendee. It uses the verified local user ID, never a client-supplied ID. A missing session returns `401 UNAUTHORIZED`; inactive or unverified accounts receive `403 FORBIDDEN` or `403 VERIFICATION_REQUIRED`; a nonempty body returns `400 VALIDATION_ERROR`; more than five calls per minute from one user returns `429 RATE_LIMITED`. The limiter is local to each API process. No Clerk organization is created.
+
+## Reporting
 
 All routes require a valid Clerk session, an active and email-verified local EventNest user, and the `organizer` role. Event-specific results are scoped to events owned by that local user. An attendee receives `403 FORBIDDEN`; an unrecognized, foreign, or malformed event returns `404 NOT_FOUND` or `400 VALIDATION_ERROR`.
 

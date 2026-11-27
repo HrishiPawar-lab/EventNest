@@ -3,6 +3,8 @@ import { createRequireEventNestUser } from '../../middleware/requireEventNestUse
 import { requireRole } from '../../middleware/authorization.js';
 import { User } from '../../models/User.js';
 import { parsePagination } from '../../pagination.js';
+import { createUserRateLimit } from '../../middleware/userRateLimit.js';
+import { ApiError } from '../../apiError.js';
 import { createOrganizerService } from './service.js';
 
 export function createOrganizerRouter({
@@ -16,6 +18,30 @@ export function createOrganizerRouter({
       userModel,
       ...(readAuth ? { readAuth } : {}),
     }),
+  );
+  router.post(
+    '/activate',
+    createUserRateLimit({ limit: 5 }),
+    async (request, response) => {
+      if (request.body && Object.keys(request.body).length > 0) {
+        throw new ApiError(
+          400,
+          'VALIDATION_ERROR',
+          'Activation takes no fields',
+        );
+      }
+      const user = await userModel.findOneAndUpdate(
+        {
+          _id: request.eventNestUser._id,
+          accountStatus: 'active',
+          'verification.emailVerified': true,
+        },
+        { $addToSet: { roles: 'organizer' } },
+        { new: true, runValidators: true, projection: { roles: 1 } },
+      );
+      if (!user) throw new ApiError(403, 'FORBIDDEN', 'Account access denied');
+      response.json({ data: { roles: user.roles } });
+    },
   );
   router.use(requireRole('organizer'));
   router.get('/dashboard', async (request, response) => {

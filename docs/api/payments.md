@@ -50,7 +50,7 @@ proof of payment.
 The confirmed transition changes a pending reservation to confirmed, moves
 reserved inventory to sold inventory, writes one ticket per entry, and writes
 one hashed QR credential per ticket in a MongoDB transaction. A capture after
-hold expiry, event cancellation, or confirmation by another payment attempt
+hold expiry, event cancellation, confirmation by another payment attempt, or an existing valid/used ticket for the same purchaser and event
 issues no tickets. The backend initiates an idempotent full refund using a
 stable `X-Refund-Idempotency` key. `refund_pending` means Razorpay has not
 reported final processing; `refund_failed` requires reconciliation. A refund

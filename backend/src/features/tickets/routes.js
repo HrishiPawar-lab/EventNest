@@ -30,6 +30,16 @@ export function createTicketRouter({
       },
     });
   });
+  router.get('/ownership', async (request, response) => {
+    response.json({
+      data: {
+        owned: await ticketService.ownsEvent(
+          request.eventNestUser._id,
+          request.query.eventId,
+        ),
+      },
+    });
+  });
   router.get('/:ticketId', async (request, response) => {
     response.json({
       data: await ticketService.get(

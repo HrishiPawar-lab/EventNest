@@ -280,7 +280,10 @@ test('captured payment issues one ticket and one hashed QR per entry exactly onc
         return { modifiedCount: 1 };
       },
     },
-    ticketModel: { create: async (items) => tickets.push(...items) },
+    ticketModel: {
+      exists: () => query(false),
+      create: async (items) => tickets.push(...items),
+    },
     credentialModel: { create: async (items) => credentials.push(...items) },
     runTransaction: (work) => work({}),
   });
@@ -300,6 +303,109 @@ test('captured payment issues one ticket and one hashed QR per entry exactly onc
     'confirmed',
   );
   assert.equal(tickets.length, 2);
+});
+
+test('a captured duplicate purchase releases its hold and refunds without tickets', async () => {
+  const payment = {
+    _id: new mongoose.Types.ObjectId(),
+    userId,
+    eventId,
+    reservationId,
+    providerOrderId: 'order_abc',
+    amount: 10000,
+    currency: 'INR',
+    status: 'created',
+  };
+  const reservation = {
+    _id: reservationId,
+    status: 'pending',
+    quantity: 1,
+    expiresAt: new Date(at.getTime() + 60000),
+  };
+  const event = {
+    _id: eventId,
+    status: 'published',
+    ticketsReserved: 1,
+    ticketsSold: 1,
+    startDate: new Date(at.getTime() + 3600000),
+  };
+  let issued = 0;
+  let refunds = 0;
+  const service = createPaymentService({
+    keyId: 'key',
+    qrSecret,
+    now: () => at,
+    gateway: {
+      fetchPayment: async () => ({
+        id: 'pay_abc',
+        status: 'captured',
+        order_id: 'order_abc',
+        amount: 10000,
+        currency: 'INR',
+      }),
+      createRefund: async (id, amount, receipt) => {
+        refunds += 1;
+        assert.equal(id, 'pay_abc');
+        assert.equal(amount, 10000);
+        return {
+          id: 'rfnd_duplicate',
+          payment_id: id,
+          amount,
+          receipt,
+          status: 'processed',
+        };
+      },
+    },
+    paymentModel: {
+      findOne: async () => payment,
+      findOneAndUpdate: async () => payment,
+      findById: () => query(payment),
+      updateOne: async (_filter, update) => {
+        Object.assign(payment, update.$set);
+        return { modifiedCount: 1 };
+      },
+    },
+    reservationModel: {
+      findById: () => query(reservation),
+      updateOne: async (_filter, update) => {
+        Object.assign(reservation, update.$set);
+        return { modifiedCount: 1 };
+      },
+    },
+    eventModel: {
+      findOneAndUpdate: async () => event,
+      updateOne: async (_filter, update) => {
+        event.ticketsReserved += update.$inc.ticketsReserved;
+        return { modifiedCount: 1 };
+      },
+    },
+    ticketModel: {
+      exists: () => query(true),
+      create: async () => {
+        issued += 1;
+      },
+    },
+    credentialModel: {
+      create: async () => {
+        issued += 1;
+      },
+    },
+    runTransaction: (work) => work({}),
+  });
+  assert.equal(
+    (await service.fulfill('order_abc', 'pay_abc')).status,
+    'refunded',
+  );
+  assert.equal(reservation.status, 'cancelled');
+  assert.equal(event.ticketsReserved, 0);
+  assert.equal(event.ticketsSold, 1);
+  assert.equal(issued, 0);
+  assert.equal(refunds, 1);
+  assert.equal(
+    (await service.fulfill('order_abc', 'pay_abc')).status,
+    'refunded',
+  );
+  assert.equal(refunds, 1);
 });
 
 test('a failed late refund never reports tickets confirmed', async () => {

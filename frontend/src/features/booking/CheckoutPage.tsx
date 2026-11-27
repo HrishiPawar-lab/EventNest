@@ -13,6 +13,7 @@ import {
 } from './api'
 import { BookingSummary, BookingUnavailable, useSelection } from './BookingUi'
 import { openCheckout } from './razorpay'
+import { useOwnsEventTicket } from '../tickets/api'
 
 export function CheckoutPage() {
   const { event, quantity, eventId, params } = useSelection()
@@ -23,6 +24,7 @@ export function CheckoutPage() {
   const paymentId = params.get('paymentId')
   const reservation = useReservation(reservationId)
   const payment = usePayment(paymentId)
+  const ownership = useOwnsEventTicket(eventId)
   const createReservation = useCreateReservation()
   const createOrder = useCreatePaymentOrder()
   const verifyPayment = useVerifyPayment()
@@ -61,7 +63,15 @@ export function CheckoutPage() {
   const orderBelowMinimum = Boolean(event.data && quantity < minimumQuantity)
 
   async function reserveAndPay() {
-    if (!eventId || !event.data || busy || unresolvedPayment || orderBelowMinimum) return
+    if (
+      !eventId ||
+      !event.data ||
+      busy ||
+      unresolvedPayment ||
+      orderBelowMinimum ||
+      ownership.data?.owned
+    )
+      return
     setNotice('')
     try {
       let holdId = reservationId
@@ -211,12 +221,22 @@ export function CheckoutPage() {
                     : `Razorpay requires a minimum order of ₹1. Select at least ${minimumQuantity} tickets on the event page.`}
                 </p>
               )}
+              {ownership.data?.owned && (
+                <p role="status" className="mt-4 text-sm text-stone-700">
+                  You already have tickets for this event.{' '}
+                  <Link to="/tickets" className="font-medium text-brand underline">
+                    View your tickets
+                  </Link>
+                </p>
+              )}
               <Button
                 type="button"
                 disabled={
                   busy ||
                   unresolvedPayment ||
                   orderBelowMinimum ||
+                  ownership.data?.owned ||
+                  ownership.isFetching ||
                   (Boolean(reservationId) && reservation.isPending)
                 }
                 onClick={() => void reserveAndPay()}

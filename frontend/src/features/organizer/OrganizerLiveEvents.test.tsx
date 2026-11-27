@@ -120,6 +120,32 @@ afterEach(() => {
 })
 
 describe('live organizer event management', () => {
+  it('shows field and venue-capacity errors while editing, before submit', async () => {
+    const requests = installApi()
+    renderRoute('/organizer/events/new')
+    await screen.findByRole('option', { name: /Harbour Arena/ })
+    fireEvent.change(screen.getByLabelText('Event name'), { target: { value: 'No' } })
+    expect(await screen.findByText('Enter at least three characters')).toBeTruthy()
+    fireEvent.change(screen.getByLabelText('Venue'), { target: { value: venueId } })
+    fireEvent.change(screen.getByLabelText('Capacity'), { target: { value: '501' } })
+    expect(await screen.findByText(/Capacity cannot exceed this venue's limit of 500/)).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Create draft' }).hasAttribute('disabled')).toBe(true)
+    fireEvent.change(screen.getByLabelText(/^Capacity/), { target: { value: '100' } })
+    await waitFor(() => expect(screen.queryByText(/Capacity cannot exceed/)).toBeNull())
+    fireEvent.change(screen.getByLabelText('Starts (your local time)'), {
+      target: { value: '2027-02-20T20:00' },
+    })
+    fireEvent.change(screen.getByLabelText('Ends (your local time)'), {
+      target: { value: '2027-02-20T18:00' },
+    })
+    expect(await screen.findByText('End time must be after start time')).toBeTruthy()
+    fireEvent.change(screen.getByLabelText(/^Ends/), {
+      target: { value: '2027-02-20T21:00' },
+    })
+    await waitFor(() => expect(screen.queryByText('End time must be after start time')).toBeNull())
+    expect(requests.some((request) => request.method === 'POST')).toBe(false)
+  })
+
   it('lists an owned draft and opens its details with a Clerk token', async () => {
     const requests = installApi()
     renderRoute('/organizer/events')

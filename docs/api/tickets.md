@@ -2,6 +2,8 @@
 
 All routes require an active, email-verified EventNest user with a valid Clerk session. They return only the caller's own records. Both attendee and organizer roles use the same account. Ticket IDs and reservation IDs are MongoDB ObjectIds; a foreign ticket is indistinguishable from a missing ticket.
 
+`GET /api/tickets/ownership?eventId=<ObjectId>` returns `200 { "data": { "owned": true|false } }` for the caller. Only `valid` or `used` tickets count as owned for repurchase prevention. A missing or invalid event ID returns `400 VALIDATION_ERROR`; missing authentication returns `401 UNAUTHORIZED`.
+
 | Method | Route                    | Query/parameter                                            | Success                                                                                                       |
 | ------ | ------------------------ | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `GET`  | `/api/tickets`           | Optional `page` (default 1), `limit` (default 20, max 100) | `200 { "data": [ticket], "pagination": { "page", "limit", "total" } }`                                        |

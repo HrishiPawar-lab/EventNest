@@ -14,10 +14,12 @@ import { Button } from '../../components/ui/button'
 import { eventDate, formatPrice, sampleEvents } from './catalog'
 import { useEvent, useEvents } from './api'
 import { EventCard, WishlistButton } from './EventCard'
+import { useOwnsEventTicket } from '../tickets/api'
 
 export function EventDetailsPage() {
   const { eventId } = useParams()
   const eventQuery = useEvent(eventId)
+  const ownership = useOwnsEventTicket(eventId)
   const recommendations = useEvents()
   const event = eventQuery.data
   const [quantity, setQuantity] = useState(1)
@@ -190,11 +192,29 @@ export function EventDetailsPage() {
               <span className="text-sm font-medium">Estimated total</span>
               <span className="text-lg font-semibold">{formatPrice(event.price * quantity)}</span>
             </div>
-            <Button asChild className="mt-5 w-full" size="lg">
-              <Link to={`/booking/review/${event.id}?quantity=${quantity}`}>
-                <LuTicket aria-hidden="true" /> Review tickets
-              </Link>
-            </Button>
+            {ownership.data?.owned ? (
+              <Button asChild className="mt-5 w-full" size="lg">
+                <Link to="/tickets">
+                  <LuTicket aria-hidden="true" /> View your tickets
+                </Link>
+              </Button>
+            ) : (
+              <Button asChild className="mt-5 w-full" size="lg">
+                <Link to={`/booking/review/${event.id}?quantity=${quantity}`}>
+                  <LuTicket aria-hidden="true" /> Review tickets
+                </Link>
+              </Button>
+            )}
+            {ownership.data?.owned && (
+              <p role="status" className="mt-3 text-center text-xs text-stone-600">
+                You already have tickets for this event.
+              </p>
+            )}
+            {ownership.isError && (
+              <p role="alert" className="mt-3 text-center text-xs text-red-700">
+                Ticket status could not be checked. Checkout will verify eligibility.
+              </p>
+            )}
             <p className="mt-3 text-center text-xs leading-5 text-stone-500">
               Availability is confirmed when you reserve.
             </p>
@@ -220,7 +240,15 @@ export function EventDetailsPage() {
               <p className="text-lg font-semibold">{formatPrice(event.price * quantity)}</p>
             </div>
             <Button asChild>
-              <Link to={`/booking/review/${event.id}?quantity=${quantity}`}>Review tickets</Link>
+              <Link
+                to={
+                  ownership.data?.owned
+                    ? '/tickets'
+                    : `/booking/review/${event.id}?quantity=${quantity}`
+                }
+              >
+                {ownership.data?.owned ? 'View your tickets' : 'Review tickets'}
+              </Link>
             </Button>
           </div>
         </div>

@@ -1,7 +1,8 @@
 import { LuArrowRight, LuCalendarDays, LuMapPin, LuShieldAlert, LuUsers } from 'react-icons/lu'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { SiteShell } from '../../components/layout/SiteShell'
 import { Button } from '../../components/ui/button'
+import { useActivateOrganizer, useOrganizerAccess } from './api'
 
 const steps = [
   {
@@ -22,6 +23,18 @@ const steps = [
 ]
 
 export function BecomeOrganizerPage() {
+  const activate = useActivateOrganizer()
+  const access = useOrganizerAccess()
+  const navigate = useNavigate()
+
+  async function start() {
+    try {
+      await activate.mutateAsync()
+      navigate('/organizer/venues/new')
+    } catch {
+      // The mutation error is shown below so the user can retry.
+    }
+  }
   return (
     <SiteShell>
       <main>
@@ -38,11 +51,28 @@ export function BecomeOrganizerPage() {
                 One account can be both an attendee and an organizer. Build a place, plan an
                 experience and welcome your crowd.
               </p>
-              <Button asChild className="mt-7">
-                <Link to="/organizer/preview">
-                  Explore organizer workspace <LuArrowRight aria-hidden="true" />
-                </Link>
-              </Button>
+              {access.isSuccess ? (
+                <Button asChild className="mt-7">
+                  <Link to="/organizer/venues/new">
+                    Create a venue <LuArrowRight aria-hidden="true" />
+                  </Link>
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  className="mt-7"
+                  disabled={activate.isPending || access.isPending}
+                  onClick={() => void start()}
+                >
+                  {activate.isPending ? 'Setting up...' : 'Become an organizer'}{' '}
+                  <LuArrowRight aria-hidden="true" />
+                </Button>
+              )}
+              {activate.isError && (
+                <p role="alert" className="mt-3 text-sm text-red-200">
+                  {activate.error.message}
+                </p>
+              )}
             </div>
             <img
               src="/images/stage.jpg"
@@ -71,10 +101,10 @@ export function BecomeOrganizerPage() {
           <div className="flex flex-wrap items-start gap-4 rounded-xl border border-orange-200 bg-orange-50 p-6">
             <LuShieldAlert aria-hidden="true" className="size-6 text-brand" />
             <div className="flex-1">
-              <h2 className="font-semibold">Organizer onboarding is not connected yet</h2>
+              <h2 className="font-semibold">One account for both experiences</h2>
               <p className="mt-1 text-sm leading-6 text-stone-700">
-                You can explore the workspace preview. Organizer access and its live management
-                screens are not connected in this frontend, so no records will be changed.
+                Your attendee account stays the same. Organizer access lets you create venues and
+                events when you are ready.
               </p>
             </div>
           </div>
