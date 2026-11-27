@@ -17,12 +17,17 @@ derivable. Payment processing requires MongoDB transactions on a replica set.
 | POST   | `/api/webhooks/razorpay`                | Razorpay HMAC over raw JSON body | Razorpay event                                                             | 200 `{ "status" }` for `payment.captured` / `order.paid` / refund events; other signed events are ignored                                       |
 
 `POST /orders` rejects inactive or expired reservations (409), unavailable
-events (409), nonpositive or unsupported fractional prices (409), invalid IDs
+events (409), order totals below 100 paise (409), nonpositive or unsupported fractional prices (409), invalid IDs
 (400), and reservations belonging to another user (404). The response contains
 the public key ID; it never contains the key secret.
-If Razorpay rejects an order or returns an inconsistent order response, the
-endpoint returns `502 PAYMENT_PROVIDER_ERROR`. The server logs only the provider
+If Razorpay rejects the configured key pair (provider HTTP 401 or 403), the
+endpoint returns `502 PAYMENT_PROVIDER_AUTH_ERROR`; the operator must check the
+Razorpay key pair on the backend. Other Razorpay order failures or inconsistent
+responses return `502 PAYMENT_PROVIDER_ERROR`. The server logs only the provider
 HTTP status, if available, and never logs provider response bodies or credentials.
+The frontend obtains the public key ID from the authenticated order response,
+so no `VITE_RAZORPAY_KEY_ID` is needed. Standard Checkout loads from Razorpay's
+hosted `checkout.js`; the key secret remains on the backend.
 An unexpected failure while saving the Payment record still returns generic
 `500 INTERNAL_ERROR`; the server logs a safe persistence-stage marker. Check
 the Render logs at the request time to distinguish these failures.

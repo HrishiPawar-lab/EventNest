@@ -56,9 +56,12 @@ export function CheckoutPage() {
     (payment.isPending ||
       payment.isError ||
       ['pending', 'successful', 'refunded'].includes(payment.data?.status ?? ''))
+  const unitPricePaise = Math.round((event.data?.price ?? 0) * 100)
+  const minimumQuantity = unitPricePaise > 0 ? Math.ceil(100 / unitPricePaise) : Infinity
+  const orderBelowMinimum = Boolean(event.data && quantity < minimumQuantity)
 
   async function reserveAndPay() {
-    if (!eventId || !event.data || busy || unresolvedPayment) return
+    if (!eventId || !event.data || busy || unresolvedPayment || orderBelowMinimum) return
     setNotice('')
     try {
       let holdId = reservationId
@@ -116,8 +119,9 @@ export function CheckoutPage() {
           setNotice('Payment window closed. Your hold remains active until it expires.')
         },
         onFailure: () => {
-          setCheckoutOpen(false)
-          setNotice('Payment failed. You can retry while the reservation remains active.')
+          setNotice(
+            'Payment failed. Try again in the payment window, or close it to check your reservation.',
+          )
         },
       })
     } catch (error) {
@@ -200,10 +204,20 @@ export function CheckoutPage() {
                   {notice}
                 </p>
               )}
+              {orderBelowMinimum && (
+                <p role="alert" className="mt-4 text-sm text-red-700">
+                  {minimumQuantity > 10
+                    ? 'This event cannot be booked at its current ticket price.'
+                    : `Razorpay requires a minimum order of ₹1. Select at least ${minimumQuantity} tickets on the event page.`}
+                </p>
+              )}
               <Button
                 type="button"
                 disabled={
-                  busy || unresolvedPayment || (Boolean(reservationId) && reservation.isPending)
+                  busy ||
+                  unresolvedPayment ||
+                  orderBelowMinimum ||
+                  (Boolean(reservationId) && reservation.isPending)
                 }
                 onClick={() => void reserveAndPay()}
                 className="mt-6 w-full"

@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -31,11 +31,13 @@ function setupApi({
   paymentState = 'created',
   refundState = null,
   verificationOutcome = 'confirmed',
+  eventPrice,
 }: {
   expired?: boolean
   paymentState?: string
   refundState?: string | null
   verificationOutcome?: 'confirmed' | 'refund_pending' | 'refund_failed' | 'refunded'
+  eventPrice?: number
 } = {}) {
   let paymentStatus = paymentState
   let refundStatus = refundState
@@ -52,7 +54,8 @@ function setupApi({
       body: options?.body ? (JSON.parse(String(options.body)) as unknown) : undefined,
       authorization: new Headers(options?.headers).get('Authorization'),
     })
-    if (path === `/api/events/${eventId}`) return json(eventRows[0])
+    if (path === `/api/events/${eventId}`)
+      return json({ ...eventRows[0], ticketPrice: eventPrice ?? eventRows[0].ticketPrice })
     if (path === '/api/reservations' && method === 'POST') {
       reservationStatus = 'pending'
       return json(
@@ -195,12 +198,43 @@ describe('attendee checkout integration', () => {
 
   it('keeps the hold but does not claim success after a failed checkout', async () => {
     const requests = setupApi()
-    vi.mocked(openCheckout).mockImplementation(async (_order, options) => options.onFailure())
+    let dismissCheckout: (() => void) | undefined
+    vi.mocked(openCheckout).mockImplementation(async (_order, options) => {
+      dismissCheckout = options.onDismiss
+      act(() => options.onFailure())
+    })
     mount(`/checkout/${eventId}?quantity=2`)
     await userEvent.setup().click(await screen.findByRole('button', { name: 'Reserve and pay' }))
     expect((await screen.findByRole('alert')).textContent).toContain('Payment failed')
+    expect(
+      (screen.getByRole('button', { name: 'Processing...' }) as HTMLButtonElement).disabled,
+    ).toBe(true)
     expect(requests.some((item) => item.path === `/api/payments/${paymentId}/verify`)).toBe(false)
     expect(screen.queryByRole('heading', { name: 'Your tickets are confirmed' })).toBeNull()
+    act(() => dismissCheckout?.())
+    expect(await screen.findByRole('button', { name: 'Reopen payment' })).toBeTruthy()
+  })
+
+  it('prevents a below-minimum order from creating a reservation', async () => {
+    const requests = setupApi({ eventPrice: 0.25 })
+    mount(`/checkout/${eventId}?quantity=3`)
+    expect((await screen.findByRole('alert')).textContent).toContain('minimum order of ₹1')
+    expect(
+      (screen.getByRole('button', { name: 'Reserve and pay' }) as HTMLButtonElement).disabled,
+    ).toBe(true)
+    expect(requests.some((item) => item.path === '/api/reservations')).toBe(false)
+  })
+
+  it('reports when no allowed quantity can meet the order minimum', async () => {
+    const requests = setupApi({ eventPrice: 0.09 })
+    mount(`/checkout/${eventId}?quantity=10`)
+    expect((await screen.findByRole('alert')).textContent).toContain(
+      'cannot be booked at its current ticket price',
+    )
+    expect(
+      (screen.getByRole('button', { name: 'Reserve and pay' }) as HTMLButtonElement).disabled,
+    ).toBe(true)
+    expect(requests.some((item) => item.path === '/api/reservations')).toBe(false)
   })
 
   it('creates a new hold after the selected reservation has expired', async () => {

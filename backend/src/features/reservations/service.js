@@ -89,6 +89,7 @@ export function createReservationService({
             _id: eventId,
             status: 'published',
             startDate: { $gt: at },
+            ticketPrice: { $gte: 1 / quantity },
             $expr: {
               $lte: [
                 { $add: ['$ticketsSold', '$ticketsReserved', quantity] },
@@ -108,6 +109,20 @@ export function createReservationService({
             })
             .session(session);
           if (!visible) throw new ApiError(404, 'NOT_FOUND', 'Event not found');
+          const meetsOrderMinimum = await eventModel
+            .exists({
+              _id: eventId,
+              status: 'published',
+              startDate: { $gt: at },
+              ticketPrice: { $gte: 1 / quantity },
+            })
+            .session(session);
+          if (!meetsOrderMinimum)
+            throw new ApiError(
+              409,
+              'ORDER_AMOUNT_TOO_LOW',
+              'Order total must be at least INR 1',
+            );
           throw new ApiError(
             409,
             'SOLD_OUT',

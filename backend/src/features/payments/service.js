@@ -27,6 +27,12 @@ function amountInPaise(ticketPrice, quantity) {
       'INVALID_PRICE',
       'Event needs a positive INR ticket price',
     );
+  if (amount < 100)
+    throw new ApiError(
+      409,
+      'ORDER_AMOUNT_TOO_LOW',
+      'Order total must be at least INR 1',
+    );
   return amount;
 }
 
@@ -180,6 +186,12 @@ export function createPaymentService({
         console.error('Payment provider order creation failed', {
           providerStatus,
         });
+        if (providerStatus === 401 || providerStatus === 403)
+          throw new ApiError(
+            502,
+            'PAYMENT_PROVIDER_AUTH_ERROR',
+            'Payment service is temporarily unavailable',
+          );
         throw new ApiError(
           502,
           'PAYMENT_PROVIDER_ERROR',

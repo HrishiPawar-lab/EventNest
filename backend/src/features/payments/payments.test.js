@@ -53,7 +53,7 @@ test('payment order converts unit INR price to integer paise before multiplying'
   const event = {
     _id: eventId,
     status: 'published',
-    ticketPrice: 0.29,
+    ticketPrice: 0.39,
     startDate: new Date(at.getTime() + 3600000),
   };
   const service = createPaymentService({
@@ -61,8 +61,8 @@ test('payment order converts unit INR price to integer paise before multiplying'
     qrSecret,
     gateway: {
       createOrder: async (details) => {
-        assert.equal(details.amount, 87);
-        return { id: 'order_abc', amount: 87, currency: 'INR' };
+        assert.equal(details.amount, 117);
+        return { id: 'order_abc', amount: 117, currency: 'INR' };
       },
     },
     reservationModel: {
@@ -78,9 +78,46 @@ test('payment order converts unit INR price to integer paise before multiplying'
     now: () => at,
   });
   const order = await service.createOrder(userId, String(reservationId));
-  assert.equal(order.amount, 87);
+  assert.equal(order.amount, 117);
   assert.equal(saved.length, 1);
-  assert.equal(saved[0].amount, 87);
+  assert.equal(saved[0].amount, 117);
+});
+
+test('payment order rejects totals below Razorpay minimum before contacting provider', async () => {
+  let providerCalled = false;
+  const service = createPaymentService({
+    keyId: 'rzp_test_key',
+    qrSecret,
+    gateway: {
+      createOrder: async () => {
+        providerCalled = true;
+      },
+    },
+    reservationModel: {
+      findOne: async () => ({
+        eventId,
+        quantity: 1,
+        status: 'pending',
+        expiresAt: new Date(at.getTime() + 60000),
+      }),
+    },
+    eventModel: {
+      findOne: async () => ({
+        ticketPrice: 0.99,
+        status: 'published',
+        startDate: new Date(at.getTime() + 3600000),
+      }),
+    },
+    now: () => at,
+  });
+  await assert.rejects(
+    () => service.createOrder(userId, String(reservationId)),
+    (error) =>
+      error instanceof ApiError &&
+      error.status === 409 &&
+      error.code === 'ORDER_AMOUNT_TOO_LOW',
+  );
+  assert.equal(providerCalled, false);
 });
 
 test('payment order reports provider failure without exposing provider details', async (context) => {
@@ -92,7 +129,7 @@ test('payment order reports provider failure without exposing provider details',
     gateway: {
       createOrder: async () => {
         throw {
-          statusCode: 401,
+          statusCode: 500,
           error: { description: 'Sensitive provider details' },
         };
       },
@@ -125,6 +162,49 @@ test('payment order reports provider failure without exposing provider details',
       error.code === 'PAYMENT_PROVIDER_ERROR',
   );
   assert.equal(transactionCalled, false);
+  assert.deepEqual(log.mock.calls[0].arguments, [
+    'Payment provider order creation failed',
+    { providerStatus: 500 },
+  ]);
+});
+
+test('payment order identifies rejected provider credentials without exposing them', async (context) => {
+  const log = context.mock.method(console, 'error', () => {});
+  const service = createPaymentService({
+    keyId: 'rzp_test_key',
+    qrSecret,
+    gateway: {
+      createOrder: async () => {
+        throw {
+          statusCode: 401,
+          error: { description: 'Private provider response' },
+        };
+      },
+    },
+    reservationModel: {
+      findOne: async () => ({
+        eventId,
+        quantity: 1,
+        status: 'pending',
+        expiresAt: new Date(at.getTime() + 60000),
+      }),
+    },
+    eventModel: {
+      findOne: async () => ({
+        ticketPrice: 499,
+        status: 'published',
+        startDate: new Date(at.getTime() + 3600000),
+      }),
+    },
+    now: () => at,
+  });
+  await assert.rejects(
+    () => service.createOrder(userId, String(reservationId)),
+    (error) =>
+      error instanceof ApiError &&
+      error.status === 502 &&
+      error.code === 'PAYMENT_PROVIDER_AUTH_ERROR',
+  );
   assert.deepEqual(log.mock.calls[0].arguments, [
     'Payment provider order creation failed',
     { providerStatus: 401 },

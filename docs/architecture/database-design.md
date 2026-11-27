@@ -214,6 +214,10 @@ reservation and payment writes on the Event document.
 may be free, but publishing requires a positive price. The API validates
 new and edited prices; publication rechecks older drafts so payment order
 creation cannot encounter an unsupported fractional price.
+Razorpay requires an order total of at least 100 paise. A published ticket may
+cost less than INR 1, but the selected quantity must reach 100 paise before a
+reservation is created. The v1 limit of ten tickets per reservation means a
+price below INR 0.10 cannot currently be purchased.
 
 The cover image fields must be set or removed together. An event without
 either field remains valid. The model validates HTTPS delivery URLs and

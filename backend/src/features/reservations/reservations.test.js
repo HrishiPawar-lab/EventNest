@@ -104,24 +104,33 @@ function makeService({
   sold = 0,
   reserved = 0,
   expired = [],
+  ticketPrice = 500,
 } = {}) {
   const state = { capacity, sold, reserved, expired, reservations: [] };
   const eventModel = {
     async findOneAndUpdate(filter, change) {
       assert.equal(filter.status, 'published');
       const quantity = change.$inc.ticketsReserved;
+      assert.deepEqual(filter.ticketPrice, { $gte: 1 / quantity });
       assert.deepEqual(filter.$expr, {
         $lte: [
           { $add: ['$ticketsSold', '$ticketsReserved', quantity] },
           '$maxAttendees',
         ],
       });
-      if (state.capacity - state.sold - state.reserved < quantity) return null;
+      if (
+        ticketPrice < filter.ticketPrice.$gte ||
+        state.capacity - state.sold - state.reserved < quantity
+      )
+        return null;
       state.reserved += quantity;
       return { _id: eventId };
     },
-    exists() {
-      return { session: async () => true };
+    exists(filter) {
+      return {
+        session: async () =>
+          filter.ticketPrice ? ticketPrice >= filter.ticketPrice.$gte : true,
+      };
     },
     async updateOne(_filter, change) {
       state.reserved += change.$inc.ticketsReserved;
@@ -227,6 +236,18 @@ test('invalid event ID and quantity are rejected before inventory writes', async
     { status: 400 },
   );
   assert.equal(state.reserved, 0);
+});
+
+test('orders below INR 1 cannot reserve inventory, but a sufficient quantity can', async () => {
+  const { service, state } = makeService({ capacity: 10, ticketPrice: 0.25 });
+  await assert.rejects(() => service.create(userId, { eventId, quantity: 3 }), {
+    status: 409,
+    code: 'ORDER_AMOUNT_TOO_LOW',
+  });
+  assert.equal(state.reserved, 0);
+  assert.equal(state.reservations.length, 0);
+  await service.create(userId, { eventId, quantity: 4 });
+  assert.equal(state.reserved, 4);
 });
 
 test('one user cannot hold the same event twice while a reservation is active', async () => {
